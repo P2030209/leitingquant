@@ -1,67 +1,208 @@
-# 雷霆三角洲量化系统（开源版）
+<div align="center">
 
-> 让每一颗子弹，都为你打工。
+# ⚡ 雷霆三角洲量化系统（开源版）
 
-《三角洲行动》首款**可视化**子弹倒卖自动化引擎：拖节点即成流程，64 条秒级行情、DeepSeek AI 选品、21 套现成方案、7×24 无人值守。
+*让每一颗子弹，都为你打工。*
 
-- 官网：<https://leitingquant.bond>
-- 下载官方发布版（需激活码）：<https://leitingquant.bond>
-- QQ 群：3245668977
-- 邮箱：LeiTingQuant@126.com
+**《三角洲行动》首款可视化子弹倒卖自动化引擎**
+拖节点即成流程 · 64 条秒级行情 · DeepSeek AI 选品 · 21 套现成方案 · 7×24 无人值守
+
+[![Version](https://img.shields.io/badge/版本-v2.9.0-FF8A2A?style=for-the-badge&labelColor=0B0D10)](https://leitingquant.bond)
+[![Platform](https://img.shields.io/badge/平台-Windows_7+_64位-58E07D?style=for-the-badge&labelColor=0B0D10)](https://leitingquant.bond)
+[![.NET](https://img.shields.io/badge/.NET-8_WPF-3FD6C9?style=for-the-badge&labelColor=0B0D10)](https://leitingquant.bond)
+[![License](https://img.shields.io/badge/协议-MIT-B98CFF?style=for-the-badge&labelColor=0B0D10)](LICENSE)
+[![QQ群](https://img.shields.io/badge/QQ群-3245668977-FF4D55?style=for-the-badge&labelColor=0B0D10)](https://leitingquant.bond)
+
+**[🌐 官网](https://leitingquant.bond) · [⬇️ 下载官方发布版](https://leitingquant.bond) · [💬 QQ 群 3245668977](https://leitingquant.bond) · [📧 LeiTingQuant@126.com](mailto:LeiTingQuant@126.com)**
+
+</div>
 
 ---
 
-## 项目结构
+## 📊 核心数据
+
+| 🎯 | 数据 | 说明 |
+|:---:|:---|:---|
+| 📈 | **64 条** | 实时行情品种 · 全量现价 + 分钟 K 线 |
+| 🧩 | **40+ 个** | 可视化节点 · 手 · 眼 · 脑 · AI 全覆盖 |
+| 📦 | **21 套** | 现成方案模板 · 开箱即用，一键载入 |
+| ⏰ | **7×24** | 无人值守挂机 · 定时启停 · 出错自停 |
+
+---
+
+## ✨ 核心特性
+
+### 🎨 流程工坊 · Visual Flow Editor
+
+> 不会写代码，也能排出一条**自动印钞流水线**。
+
+像画思维导图一样编排交易逻辑：从工具箱拖出节点，圆点之间拉一条线，方案就完成了。
+运行时节点逐个高亮、变量实时可见，任何一步出错都会**红色闪烁并当场暂停**，改完点「继续」即从该步重跑。
+
+- 七大类 **40+ 节点**：流程 / 运动控制 / 视觉识别 / 买卖控制 / 逻辑判断 / AI 风控 / 脚本扩展
+- 框选、复制、整组拖动、分叉-汇合自动排版
+- 画布缩放平移 · 直角折线连线 · 循环回路独立通道
+
+### 🧩 我的模块 · v2.9.0 全新
+
+> 把你的绝活，打包成一个模块。
+
+框选一串跑通的节点 → 右键「打包为我的模块」→ 它立刻变成工具箱里的一张紫色卡片，可以拖进**任何方案**反复使用。
+
+- ✅ **一键打包**：Ctrl 点选 / 拖框多选 → 右键打包
+- ✅ **处处复用**：模块拖入任意流程，变量与主流程天然共享
+- ✅ **双击即改**：所有引用它的方案自动用新版
+- ✅ **文件即资产**：一个 `.subflow.json` 发给战友，导入即用
+- ✅ **模块套模块**：递归嵌套，自引用自动拦截，运行安全不爆栈
+
+### 📡 行情与 AI · Market Intelligence
+
+> 64 个品种的呼吸，AI 替你盯着。
+
+直连 moligod 官方行情接口：全量现价秒级拉取、分钟级历史序列自动推送 K 线监控台。
+不用部署、不用抓屏——**没绑游戏窗口也能选品播报**。
+
+<details>
+<summary><b>🔢 九大内置量化指标（点击展开）</b></summary>
+
+| 指标 | 含义 | 指标 | 含义 |
+|:---:|:---|:---:|:---|
+| `MA` | 均价趋势 | `MAX` | 区间最高 |
+| `EMA` | 指数均线 | `CHANGE` | 涨跌幅 |
+| `RSI` | 超买超卖 | `VOL` | 波动率 |
+| `MIN` | 区间最低 | `POSITION` | 高低位 % |
+| `LAST` | 最新值 | | |
+
+指标结果自动写入流程变量，在「如果…否则」节点里直接比较，不需要一行公式。
+
+</details>
+
+**🤖 DeepSeek AI 决策**：填入你的 API Key，流程即可插入「AI 决策」「AI 是/否判断」「AI 三选一执行」节点——AI 读行情、读持仓、读变量，按你定的提示词输出 `BUY / WAIT / SELL`。
+
+### 🎲 六大策略引擎
+
+> 同一张行情表，六种赚钱姿势。
+
+| 策略 | 定位 | 打法 |
+|:---:|:---|:---|
+| **SMART** 🏆 | 新手默认 | 综合利润/波动/流动性/持仓自动打分排序 |
+| **PROFIT** 💰 | 利润优先 | 只认税后单轮利润，够厚才出手 |
+| **RISE** 🚀 | 动量追涨 | 捕捉拉升品种，买在中段卖在高点 |
+| **DIP** 🩸 | 超跌抄底 | RSI 超卖进场，捡恐慌盘便宜筹码 |
+| **REBOUND** 🎣 | 反弹捕捉 | 跌势衰竭第一拐头，止损极硬 |
+| **RANGE** 📦 | 区间套利 | 箱体低买高卖，震荡市稳定出货 |
+
+---
+
+## 📦 21 套官方方案模板
+
+| # | 模板 | 说明 |
+|:---:|:---|:---|
+| 01 | 新手测试 | 只领邮件+读余额，不买不卖，首次配坐标专用 |
+| 02 | 盯盘播报 | 每 60 秒网络选品，达标响铃打印，绝不操作游戏 |
+| 03 | 抄底建仓 | DIP 超跌选品，达标买入一份，单次结束 |
+| 04 | 秒卖上架 | 选子弹→弹窗进交易行→删位定价→确认上架 |
+| 05 | 军需清仓 | 推车批量选取，军需处回收白绿品变现 |
+| 06 | 标准倒卖 | 999 轮教学版：领币→选品→买入→盯盘→上架 |
+| 07 | **完整交易** 🏆 | 37 节点全自动闭环，双层封禁急停+成交提醒 |
+| 08 | **无限托管** 🏆 | 循环 0 次永不停轮，仅 F12 退出，挂机之王 |
+| 09 | 只播报 | 领币后网络选品，达标只响铃打印，安全看戏 |
+| 10 | 秒卖补货 | 无限循环：读持仓→秒上架→等成交→买回一份 |
+| 11 | 领币清仓 | 单次：领邮件哈弗币→开仓库→军需处批量回收 |
+| 15 | **AI决策买入** 🤖 | 选品后 AI 把关「买不买」，批准才下单 |
+| 16 | **AI持仓管家** 🤖 | AI 三选一：继续持有 / 交易行卖 / 军需处认赔 |
+| 17 | **AI量化闭环** 🤖🏆 | AI 把关买入 + AI 处置持仓，999 轮全自动 |
+| 18 | 六策略轮测 | 六大策略同盘对比，Python 汇总利润排行榜 |
+| 19 | Lua动态仓位 | Lua 按余额与利润动态算份数，风控买入 |
+| 20 | 多品种分仓 | SMART/DIP/RISE 三路建仓，一次持有 3 颗子弹 |
+| 21 | **AI盯盘播报** 🤖 | AI 全盘点评+机会判断，有人话播报绝不乱动 |
+| ＋ | 🧩 我的模块 | 把你自己的独门打法打包进去，无限扩展 |
+
+---
+
+## 🗂️ 项目结构
 
 ```
-├── WindowSpy/          主程序（.NET 8 + WPF，C#）
-│   ├── FlowModel.cs        可视化流程节点/连线数据模型（40+ 节点定义）
-│   ├── FlowRunner.cs       流程执行引擎（错误暂停/循环栈/变量系统）
-│   ├── FlowEditorWindow.*  流程工坊可视化编辑器（拖拽/框选/自动排版/我的模块）
-│   ├── FlowTemplates.cs    21 套内置方案模板（AI/脚本/多品种）
-│   ├── FlowLayout.cs       分叉-汇合自动排版算法
-│   ├── MarketService.cs    moligod 官方行情接口（64 品种秒级现价+分钟K线）
-│   ├── QuantMath.cs        九大量化指标（MA/EMA/RSI/MIN/MAX/CHANGE/VOL/POSITION/LAST）
-│   ├── DeepSeekClient.cs   DeepSeek AI 决策节点（BUY/WAIT/SELL）
-│   ├── HostActions.cs      鼠标键盘模拟执行层
-│   ├── MonitorWindow.*     屏幕监控/OCR 视觉
-│   └── ...
-└── Scripts/            Python OCR 脚本（ONNX 文字识别）
+📦 leitingquant
+├── 📁 WindowSpy/          主程序（.NET 8 + WPF，C#）
+│   ├── FlowModel.cs         可视化流程节点/连线数据模型（40+ 节点定义）
+│   ├── FlowRunner.cs        流程执行引擎（错误暂停/循环栈/变量系统）
+│   ├── FlowEditorWindow.*   流程工坊可视化编辑器（拖拽/框选/自动排版）
+│   ├── FlowTemplates.cs     21 套内置方案模板（AI/脚本/多品种）
+│   ├── FlowLayout.cs        分叉-汇合自动排版算法
+│   ├── MarketService.cs     moligod 官方行情接口（64 品种）
+│   ├── QuantMath.cs         九大量化指标
+│   ├── DeepSeekClient.cs    DeepSeek AI 决策节点
+│   ├── HostActions.cs       鼠标键盘模拟执行层
+│   └── MonitorWindow.*      屏幕监控 / OCR 视觉
+└── 📁 Scripts/            Python OCR 脚本（ONNX 文字识别）
 ```
 
-## 核心特性
+---
 
-- **流程工坊**：七大类 40+ 可视化节点，拖拽编排交易策略，出错红框暂停可续跑
-- **我的模块**：框选节点打包复用，递归嵌套，`.subflow.json` 即资产
-- **行情与 AI**：64 品种秒级行情直连官方接口，九大量化指标，DeepSeek AI 决策/是/否/三选一节点
-- **六大策略**：SMART / PROFIT / RISE / DIP / REBOUND / RANGE 选品引擎
-- **21 套模板**：新手测试到 AI 量化全自动闭环，开箱即用
-- **安全风控**：双层封禁检测、出错即停热修复、窗口 A/B 双开、F12 急停
+## 🛠️ 构建
 
-## 构建
+| 要求 | 版本 |
+|:---|:---|
+| 操作系统 | Windows 7 / 10 / 11 · 64 位 |
+| SDK | [.NET 8 SDK](https://dotnet.microsoft.com/download/dotnet/8.0) |
+| IDE（可选） | Visual Studio 2022 |
 
-- Visual Studio 2022 或 .NET 8 SDK
-- `dotnet build WindowSpy`（Windows 平台，net8.0-windows）
+```bash
+git clone https://github.com/P2030209/leitingquant.git
+cd leitingquant
+dotnet build WindowSpy
+```
 
-> Python OCR 环境与 ONNX 模型文件不在仓库内（体积原因），OCR 节点需自行用
-> `Scripts/` 下的脚本打包，或直接使用官方发布版。
+> 💡 Python OCR 环境与 ONNX 模型不在仓库内（体积原因），OCR 节点需用 `Scripts/` 自行打包，或直接用官方发布版。
 
-## 关于授权模块（未开源说明）
+---
 
-本仓库为**源码学习用途**。授权/加密算法相关代码（机器指纹、ECDSA P-256 签名验证、
-申请码编解码、防篡改校验）**未包含在本仓库**，`WindowSpy/LicenseManager.cs`
-为占位实现，仅保留公开接口使项目可编译。
+## 🔒 关于授权模块（未开源说明）
 
-因此：
+> 本仓库为**源码学习用途**。
 
-- 本仓库编译产物**无法激活**，仅供阅读与研究
-- 完整可用的软件请从[官网](https://leitingquant.bond)下载官方发布版（需激活码授权）
+<details>
+<summary><b>为什么授权算法不开源？</b></summary>
 
-## 免责声明
+官方发布版通过授权模块完成：机器指纹采集、ECDSA P-256 + SHA256 签名验证、
+Crockford Base32 申请码编解码、防回退时间戳校验。
 
+出于安全与商业考虑，这些代码**未包含在本仓库**——`WindowSpy/LicenseManager.cs`
+为占位实现，仅保留公开接口使项目可编译。因此：
+
+- ⚠️ 本仓库编译产物**无法激活**，仅供阅读与研究
+- ✅ 完整可用的软件请从 [官网](https://leitingquant.bond) 下载官方发布版（需激活码授权）
+
+</details>
+
+---
+
+## 🚀 快速上手（官方发布版）
+
+| 步骤 | 操作 |
+|:---:|:---|
+| **1️⃣ 下载** | [官网](https://leitingquant.bond) 或 123 网盘下载，解压即用（绿色免安装） |
+| **2️⃣ 申请码** | 打开软件 → 激活窗口点「申请授权」→ 自动生成专属申请码 |
+| **3️⃣ 领激活码** | 把申请码发到 QQ 群 **3245668977**，站长发你激活文件，放入 exe 旁即激活 |
+
+---
+
+## ⚠️ 免责声明
+
+```
 本软件仅通过模拟鼠标键盘实现重复操作自动化，与游戏官方无任何关联。
 请理性游戏、遵守用户协议；因使用本工具产生的账号风险由使用者自行承担。
+```
 
-## License
+---
 
-MIT © 雷霆网络开发工作室
+<div align="center">
+
+**⚡ 雷霆三角洲量化系统** · 玩家自制效率工具
+
+[🌐 leitingquant.bond](https://leitingquant.bond) · 💬 QQ 群 3245668977
+
+*如果这个项目对你有帮助，欢迎点一个 ⭐ Star！*
+
+</div>
