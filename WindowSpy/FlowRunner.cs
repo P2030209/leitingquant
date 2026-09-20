@@ -538,6 +538,8 @@ namespace WindowSpy
                     Log("wait", "正在拉取行情…");
                     var quotes = _act.FetchQuotes(P("url"));
                     Set(P("var"), quotes);
+                    // 用最新行情更新持仓浮盈
+                    try { TradeLog.UpdatePrices(quotes); } catch { }
                     Log("info", $"行情已拉取：{quotes.Count} 条 → {P("var")}");
                     break;
                 }
@@ -579,10 +581,26 @@ namespace WindowSpy
                 }
                 case "buy":
                     _act.Click(Pt("pos"), 80, 3); _act.Settle(I("settle", 350));
-                    Log("buy", "执行买入"); break;
+                    Log("buy", "执行买入");
+                    // 收益仪表盘：开仓记录（取选品节点的品名/份数/现价）
+                    try
+                    {
+                        var bn = HostActions.Substitute("{选品品名}", _vars);
+                        var bq = Num("{选品份数}") ?? 1;
+                        var bp = Num("{选品现价}") ?? 0;
+                        TradeLog.Open(bn, bq, bp);
+                    } catch { }
+                    break;
                 case "sell":
                     _act.Click(Pt("pos"), 80, 3); _act.Settle(I("settle", 350));
-                    Log("sell", "执行卖出"); break;
+                    Log("sell", "执行卖出");
+                    try
+                    {
+                        var sn = HostActions.Substitute("{选品品名}", _vars);
+                        var sp = Num("{持仓卖出价}") ?? Num("{选品卖出价}") ?? 0;
+                        TradeLog.Close(sn, sp);
+                    } catch { }
+                    break;
                 case "hold_quote":
                 {
                     var name = HostActions.Substitute(P("name"), _vars);
@@ -616,6 +634,109 @@ namespace WindowSpy
                     Set(px2 + "现价", price); Set(px2 + "浮盈", profitPct); Set(px2 + "MA", ma);
                     Set(px2 + "RSI", rsi); Set(px2 + "位置", pos); Set(px2 + "卖出价", exit);
                     Log("wait", $"{name} 现价{price:0} 浮盈{profitPct:0.0}% RSI{rsi:0} 位置{pos:0.00}");
+                    break;
+                }
+                case "monitor_tp_sl":
+                {
+                    // 移动止盈止损：拉现价，算浮盈，跟踪峰值，命中止盈/止损/回撤则走 sell 出口
+                    var mname = HostActions.Substitute(P("name"), _vars);
+                    List<double> mhist = new();
+                    if (_vars.TryGetValue(P("quotes"), out var qv) && qv is List<MarketQuote> ql)
+                    {
+                        var mq = MarketService.Match(ql, mname);
+                        if (mq != null) mhist = mq.History ?? new();
+                    }
+                    if (mhist.Count < 5)
+                    {
+                        try { mhist = MarketService.FetchHistory(mname, "5m", 60); } catch { }
+                    }
+                    double mprice = mhist.Count > 0 ? mhist[^1] : 0;
+                    if (mprice <= 0 && _vars.TryGetValue(P("quotes"), out var qv3) && qv3 is List<MarketQuote> ql3)
+                        mprice = MarketService.Match(ql3, mname)?.Price ?? 0;
+
+                    double mBuy = Num(P("buyprice")) ?? mprice;
+                    double profitPct = mBuy > 0 ? (mprice - mBuy) / mBuy * 100 : 0;
+
+                    // 峰值浮盈（跨节点持久化在变量里）
+                    string peakKey = P("prefix") + "峰值";
+                    double peak = 0;
+                    if (_vars.TryGetValue(peakKey, out var pv) && double.TryParse(pv?.ToString(), out var pv2))
+                        peak = pv2;
+                    if (profitPct > peak) peak = profitPct;
+                    Set(peakKey, peak);
+
+                    double tp = Num("takeProfit") ?? 0;
+                    double sl = Num("stopLoss") ?? 0;
+                    double trail = Num("trailing") ?? 0;
+
+                    string mpx = P("prefix");
+                    Set(mpx + "现价", mprice); Set(mpx + "浮盈", profitPct); Set(mpx + "峰值", peak);
+
+                    bool shouldSell = false;
+                    string reason = "";
+                    if (tp > 0 && profitPct >= tp) { shouldSell = true; reason = $"达到止盈 {tp}%"; }
+                    else if (sl > 0 && profitPct <= -sl) { shouldSell = true; reason = $"触发止损 {sl}%"; }
+                    else if (trail > 0 && peak > trail && (peak - profitPct) >= trail && profitPct > 0)
+                    { shouldSell = true; reason = $"移动止盈：从峰值 {peak:0.0}% 回撤 {trail}%"; }
+
+                    Log(shouldSell ? "sell" : "wait",
+                        $"{mname} 现价{mprice:0} 浮盈{profitPct:0.0}% 峰值{peak:0.0}% → {(shouldSell ? "卖出：" + reason : "继续持有")}");
+                    return (Flow.Edge, shouldSell ? "sell" : "hold");
+                }
+                case "backtest":
+                {
+                    // 策略回测器：用历史K线模拟策略在过去一段时间的表现
+                    if (!(_vars.TryGetValue(P("quotes"), out var bqv) && bqv is List<MarketQuote> bql))
+                    { Log("error", "回测：行情列表变量不存在"); break; }
+
+                    double tp = Num("takeProfit") ?? 8;
+                    double sl = Num("stopLoss") ?? 5;
+                    double trail = Num("trailing") ?? 3;
+                    var rets = new List<double>();
+
+                    foreach (var q in bql)
+                    {
+                        var h = q.History;
+                        if (h == null || h.Count < 10) continue;
+                        double buy = h[0];
+                        if (buy <= 0) continue;
+                        double peak = buy;
+                        double exit = buy;
+                        bool exited = false;
+                        for (int i = 1; i < h.Count; i++)
+                        {
+                            double p = h[i];
+                            if (p > peak) peak = p;
+                            double pnl = (p - buy) / buy * 100;
+                            double peakPnl = (peak - buy) / buy * 100;
+                            if (tp > 0 && pnl >= tp) { exit = p; exited = true; break; }
+                            if (sl > 0 && pnl <= -sl) { exit = p; exited = true; break; }
+                            if (trail > 0 && peakPnl > trail && (peakPnl - pnl) >= trail && pnl > 0)
+                            { exit = p; exited = true; break; }
+                        }
+                        if (exited) rets.Add((exit - buy) / buy * 100);
+                        else rets.Add((h[^1] - buy) / buy * 100); // 持有到末尾
+                    }
+
+                    int btCount = rets.Count;
+                    double avgRet = btCount > 0 ? rets.Average() : 0;
+                    int wins = rets.Count(r => r > 0);
+                    double winRate = btCount > 0 ? (double)wins / btCount * 100 : 0;
+                    double grossProfit = rets.Where(r => r > 0).Sum();
+                    double grossLoss = Math.Abs(rets.Where(r => r < 0).Sum());
+                    double profitFactor = grossLoss > 0 ? grossProfit / grossLoss : (grossProfit > 0 ? 99 : 0);
+
+                    // 最大回撤：模拟等额资金曲线
+                    double equity = 1.0, peakEq = 1.0, maxDd = 0;
+                    foreach (var r in rets) { equity *= (1 + r / 100); if (equity > peakEq) peakEq = equity; maxDd = Math.Max(maxDd, (peakEq - equity) / peakEq * 100); }
+
+                    string bpx = P("prefix");
+                    Set(bpx + "收益率", Math.Round(avgRet, 2));
+                    Set(bpx + "胜率", Math.Round(winRate, 1));
+                    Set(bpx + "交易数", btCount);
+                    Set(bpx + "最大回撤", Math.Round(maxDd, 2));
+                    Set(bpx + "盈亏比", Math.Round(profitFactor, 2));
+                    Log("info", $"回测[{P("strategy")}] {btCount}笔 平均收益{avgRet:+0.00;-0.00}% 胜率{winRate:0}% 最大回撤{maxDd:0.0}% 盈亏比{profitFactor:0.00}");
                     break;
                 }
 
@@ -669,7 +790,15 @@ namespace WindowSpy
                 }
                 case "list_confirm":
                     _act.ListConfirm(Pt("pos"), Pt("confirm"), I("settle", 600));
-                    Log("sell", "已确认上架，等待成交"); break;
+                    Log("sell", "已确认上架，等待成交");
+                    // 收益仪表盘：上架即视为平仓（按上架价结算盈亏）
+                    try
+                    {
+                        var ln = HostActions.Substitute("{选品品名}", _vars);
+                        var lp = Num("{持仓卖出价}") ?? Num("{选品卖出价}") ?? 0;
+                        TradeLog.Close(ln, lp);
+                    } catch { }
+                    break;
                 case "recycle_batch":
                     _act.RecycleBatch(Pt("cart"), Pt("selectall"), Pt("recycle"), Pt("confirm"), I("settle", 500));
                     Log("sell", "军需处批量回收完成"); break;
@@ -765,6 +894,39 @@ namespace WindowSpy
                     else if (ContainsKw(reply, P("kwC"))) port = "c";
                     Log(port == "a" ? "buy" : port == "b" ? "sell" : "wait", $"AI执行 → 方案{port.ToUpperInvariant()}");
                     return (Flow.Edge, port);
+                }
+                case "ai_daily_report":
+                {
+                    Log("wait", "AI 正在生成今日复盘日报…");
+                    var data = TradeLog.FormatTodayReport();
+                    var prompt = $"你是三角洲行动子弹倒卖交易的复盘分析师。以下是今日交易数据：\n\n{data}\n\n" +
+                                 "请用中文生成一份简洁的复盘日报，包含：1.今日总体表现一句话总结；" +
+                                 "2.盈利最多和亏损最多的子弹点评；3.胜率与盈亏比分析；4.明天的操作建议（2-3条）。" +
+                                 "不要编造数据，只基于以上事实。控制在300字以内。";
+                    var report = AskAi(prompt, P("model"));
+                    Set(P("var"), report);
+                    Log("info", $"AI复盘日报已生成 → {Trunc(report, 80)}");
+                    break;
+                }
+                case "ai_optimize":
+                {
+                    Log("wait", "AI 正在分析回测结果并优化策略参数…");
+                    string bp = P("backtestPrefix");
+                    var ret = _vars.TryGetValue(bp + "收益率", out var rv) ? rv?.ToString() : "未知";
+                    var wr = _vars.TryGetValue(bp + "胜率", out var wv) ? wv?.ToString() : "未知";
+                    var tc = _vars.TryGetValue(bp + "交易数", out var tv) ? tv?.ToString() : "未知";
+                    var dd = _vars.TryGetValue(bp + "最大回撤", out var dv) ? dv?.ToString() : "未知";
+                    var pf = _vars.TryGetValue(bp + "盈亏比", out var fv) ? fv?.ToString() : "未知";
+
+                    var prompt = $"你是三角洲行动子弹倒卖量化策略优化专家。当前策略「{P("strategy")}」的回测结果如下：\n" +
+                                 $"- 平均收益率：{ret}%\n- 胜率：{wr}%\n- 交易笔数：{tc}\n- 最大回撤：{dd}%\n- 盈亏比：{pf}\n\n" +
+                                 "请基于以上数据，用中文给出：1.当前策略的问题诊断；2.建议调整的止盈%、止损%、移动止盈回撤%具体数值；" +
+                                 "3.是否建议切换到其他策略（SMART/PROFIT/RISE/DIP/REBOUND/RANGE）及理由；4.风险提示。" +
+                                 "控制在300字以内，给出可直接执行的参数建议。";
+                    var advice = AskAi(prompt, P("model"));
+                    Set(P("var"), advice);
+                    Log("info", $"AI优化建议已生成 → {Trunc(advice, 80)}");
+                    break;
                 }
                 case "ban_check":
                 {
