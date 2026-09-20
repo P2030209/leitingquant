@@ -11,9 +11,9 @@
 [![Platform](https://img.shields.io/badge/平台-Windows_7+_64位-58E07D?style=for-the-badge&labelColor=0B0D10)](https://leitingquant.bond)
 [![.NET](https://img.shields.io/badge/.NET-8_WPF-3FD6C9?style=for-the-badge&labelColor=0B0D10)](https://leitingquant.bond)
 [![License](https://img.shields.io/badge/协议-MIT-B98CFF?style=for-the-badge&labelColor=0B0D10)](LICENSE)
-[![QQ群](https://img.shields.io/badge/QQ群-3245668977-FF4D55?style=for-the-badge&labelColor=0B0D10)](https://leitingquant.bond)
+[![站长QQ](https://img.shields.io/badge/站长QQ-3245668977-FF4D55?style=for-the-badge&labelColor=0B0D10)](https://leitingquant.bond)
 
-**[🌐 官网](https://leitingquant.bond) · [⬇️ 下载官方发布版](https://leitingquant.bond) · [💬 QQ 群 3245668977](https://leitingquant.bond) · [📧 LeiTingQuant@126.com](mailto:LeiTingQuant@126.com)**
+**[🌐 官网](https://leitingquant.bond) · [⬇️ 下载官方发布版](https://leitingquant.bond) · [💬 站长 QQ 3245668977](https://leitingquant.bond) · [🎵 抖音主页](https://v.douyin.com/jmQv4E-3SCA/) · [📧 LeiTingQuant@126.com](mailto:LeiTingQuant@126.com)**
 
 </div>
 
@@ -184,7 +184,7 @@ Crockford Base32 申请码编解码、防回退时间戳校验。
 |:---:|:---|
 | **1️⃣ 下载** | [官网](https://leitingquant.bond) 或 123 网盘下载，解压即用（绿色免安装） |
 | **2️⃣ 申请码** | 打开软件 → 激活窗口点「申请授权」→ 自动生成专属申请码 |
-| **3️⃣ 领激活码** | 把申请码发到 QQ 群 **3245668977**，站长发你激活文件，放入 exe 旁即激活 |
+| **3️⃣ 领激活码** | 加站长 QQ **3245668977**，把申请码发给站长，领取激活文件放入 exe 旁即激活 |
 
 ---
 
@@ -201,7 +201,7 @@ Crockford Base32 申请码编解码、防回退时间戳校验。
 
 **⚡ 雷霆三角洲量化系统** · 玩家自制效率工具
 
-[🌐 leitingquant.bond](https://leitingquant.bond) · 💬 QQ 群 3245668977
+[🌐 leitingquant.bond](https://leitingquant.bond) · 💬 站长 QQ 3245668977 · 🎵 [抖音主页](https://v.douyin.com/jmQv4E-3SCA/)
 
 *如果这个项目对你有帮助，欢迎点一个 ⭐ Star！*
 
