@@ -410,6 +410,64 @@ namespace WindowSpy
 
         private void FlowProjRefresh_Click(object sender, RoutedEventArgs e) => RefreshFlowProjects();
 
+        // —————— 收益仪表盘 ——————
+        private void PnlRefresh_Click(object sender, RoutedEventArgs e) => RefreshPnl();
+
+        private void PnlClear_Click(object sender, RoutedEventArgs e)
+        {
+            if (MessageBox.Show("确定清空所有交易记录？此操作不可恢复。", "确认",
+                    MessageBoxButton.YesNo, MessageBoxImage.Question) != MessageBoxResult.Yes) return;
+            TradeLog.Clear();
+            RefreshPnl();
+        }
+
+        private void RefreshPnl()
+        {
+            try
+            {
+                var s = TradeLog.Stats();
+                var pos = new SolidColorBrush(System.Windows.Media.Color.FromRgb(0x58, 0xE0, 0x7D));
+                var neg = new SolidColorBrush(System.Windows.Media.Color.FromRgb(0xFF, 0x4D, 0x55));
+                PnlToday.Text = (s.TodayPnl >= 0 ? "+" : "") + s.TodayPnl.ToString("0.00");
+                PnlToday.Foreground = s.TodayPnl >= 0 ? pos : neg;
+                PnlTodayCount.Text = $"{s.TodayCount} 笔交易";
+
+                PnlTotal.Text = (s.TotalPnl >= 0 ? "+" : "") + s.TotalPnl.ToString("0.00");
+                PnlTotal.Foreground = s.TotalPnl >= 0 ? pos : neg;
+                PnlTotalCount.Text = $"{s.TotalCount} 笔交易";
+
+                PnlWinRate.Text = s.WinRate.ToString("0") + "%";
+                PnlMaxDd.Text = s.MaxDrawdown.ToString("0.00");
+
+                // 持仓列表
+                PosTotalValue.Text = s.TotalValue.ToString("0.00");
+                PosFloating.Text = (s.FloatingPnl >= 0 ? "+" : "") + s.FloatingPnl.ToString("0.00");
+                PosFloating.Foreground = s.FloatingPnl >= 0 ? pos : neg;
+                var items = s.OpenPositions.Select(r => new PosItem
+                {
+                    Name = r.Name,
+                    BuyPrice = r.BuyPrice,
+                    CurrentPrice = r.CurrentPrice > 0 ? r.CurrentPrice : r.BuyPrice,
+                    Qty = r.Qty,
+                    FloatingPnl = r.FloatingPnl,
+                    FloatingPnlBrush = r.FloatingPnl >= 0 ? pos : neg
+                }).ToList();
+                PosList.ItemsSource = items;
+                PosEmpty.Visibility = items.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
+            }
+            catch { }
+        }
+
+        public class PosItem
+        {
+            public string Name { get; set; } = "";
+            public double BuyPrice { get; set; }
+            public double CurrentPrice { get; set; }
+            public double Qty { get; set; }
+            public double FloatingPnl { get; set; }
+            public System.Windows.Media.Brush FloatingPnlBrush { get; set; } = System.Windows.Media.Brushes.White;
+        }
+
         private void RefreshFlowProjects(string? selectFile = null)
         {
             if (FlowProjectCombo == null) return;
@@ -502,6 +560,7 @@ namespace WindowSpy
             r.NodeError += OnFlowNodeError;
             r.StateChanged += OnFlowState;
             r.Finished += OnFlowFinished;
+            r.Logged += OnFlowLogged;
             _flowRunner = r;
             AppendLog($"[流程] ▶ 启动工程：{file}（{g.Nodes.Count}个节点）——窗口将隐藏，F9呼出，F12急停");
             AppendLog("[流程] 提示：游戏请用「无边框窗口化」显示模式；独占全屏下后台抓屏与遮罩可能失效");
@@ -553,6 +612,13 @@ namespace WindowSpy
             SetFlowButtons(s);
             UpdateFlowStatusLine();
         }));
+
+        // 买卖日志触发收益仪表盘刷新
+        private void OnFlowLogged(string level, string msg)
+        {
+            if (level == "buy" || level == "sell")
+                Dispatcher.BeginInvoke(new Action(RefreshPnl));
+        }
 
         private void OnFlowFinished(bool ok) => Dispatcher.BeginInvoke(new Action(() =>
         {
@@ -1181,6 +1247,7 @@ namespace WindowSpy
         private void MainWindow_Loaded(object sender, RoutedEventArgs e)
         {
             RefreshFlowProjects();
+            RefreshPnl();
         }
 
 
