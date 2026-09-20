@@ -651,6 +651,41 @@ namespace WindowSpy
                     new() { Key = "settle", Label = "每步等待ms", Type = FlowParamType.Int, Default = "500" }
                 }
             });
+            _defs.Add(new FlowNodeDef
+            {
+                Type = "monitor_tp_sl", Category = CatTrade, Title = "移动止盈止损", Color = "#FF8A2A",
+                Outputs = new() { new("sell", "该卖了"), new("hold", "继续持有") },
+                Params = new()
+                {
+                    new() { Key = "quotes", Label = "行情列表变量", Type = FlowParamType.Text, Default = "行情列表" },
+                    new() { Key = "name", Label = "持仓子弹名", Type = FlowParamType.Text, Default = "{选品品名}" },
+                    new() { Key = "buyprice", Label = "买入价(数字或{变量})", Type = FlowParamType.Text, Default = "{选品现价}" },
+                    new() { Key = "takeProfit", Label = "固定止盈%", Type = FlowParamType.Double, Default = "8",
+                        Tip = "浮盈达到该百分比立即卖出；0=不启用固定止盈" },
+                    new() { Key = "stopLoss", Label = "固定止损%", Type = FlowParamType.Double, Default = "5",
+                        Tip = "浮亏达到该百分比立即卖出；0=不止损" },
+                    new() { Key = "trailing", Label = "移动止盈(回撤%)", Type = FlowParamType.Double, Default = "3",
+                        Tip = "浮盈从峰值回撤该百分比且仍盈利时卖出；0=关闭移动止盈" },
+                    new() { Key = "prefix", Label = "输出变量前缀", Type = FlowParamType.Text, Default = "盯盘",
+                        Tip = "输出：盯盘现价/盯盘浮盈%/盯盘峰值%" }
+                }
+            });
+            _defs.Add(new FlowNodeDef
+            {
+                Type = "backtest", Category = CatTrade, Title = "策略回测器", Color = "#FF8A2A",
+                Params = new()
+                {
+                    new() { Key = "quotes", Label = "行情列表变量", Type = FlowParamType.Text, Default = "行情列表" },
+                    new() { Key = "strategy", Label = "回测策略", Type = FlowParamType.Combo, Default = "SMART",
+                        Options = new[] { "SMART", "PROFIT", "RISE", "DIP", "REBOUND", "RANGE" } },
+                    new() { Key = "capital", Label = "初始资金", Type = FlowParamType.Double, Default = "100000" },
+                    new() { Key = "takeProfit", Label = "止盈%", Type = FlowParamType.Double, Default = "8" },
+                    new() { Key = "stopLoss", Label = "止损%", Type = FlowParamType.Double, Default = "5" },
+                    new() { Key = "trailing", Label = "移动止盈回撤%", Type = FlowParamType.Double, Default = "3" },
+                    new() { Key = "prefix", Label = "输出变量前缀", Type = FlowParamType.Text, Default = "回测",
+                        Tip = "输出：回测收益率/回测胜率/回测交易数/回测最大回撤/回测盈亏比" }
+                }
+            });
 
             // —————— 逻辑判断 ——————
             _defs.Add(new FlowNodeDef
@@ -753,6 +788,28 @@ namespace WindowSpy
                 {
                     new() { Key = "words", Label = "封禁关键词(留空用默认)", Type = FlowParamType.Text,
                         Default = "封禁,封号,封停,冻结,异常,违规,惩罚,限制,警告" }
+                }
+            });
+            _defs.Add(new FlowNodeDef
+            {
+                Type = "ai_daily_report", Category = CatAi, Title = "AI复盘日报", Color = "#FF4D55",
+                Params = new()
+                {
+                    new() { Key = "model", Label = "模型(留空默认)", Type = FlowParamType.Text, Default = "" },
+                    new() { Key = "var", Label = "日报存入变量", Type = FlowParamType.Text, Default = "AI日报" }
+                }
+            });
+            _defs.Add(new FlowNodeDef
+            {
+                Type = "ai_optimize", Category = CatAi, Title = "AI策略优化器", Color = "#FF4D55",
+                Params = new()
+                {
+                    new() { Key = "strategy", Label = "当前策略", Type = FlowParamType.Combo, Default = "SMART",
+                        Options = new[] { "SMART", "PROFIT", "RISE", "DIP", "REBOUND", "RANGE" } },
+                    new() { Key = "backtestPrefix", Label = "回测结果前缀", Type = FlowParamType.Text, Default = "回测",
+                        Tip = "接在「策略回测器」后面，读取回测收益率/胜率/交易数/最大回撤" },
+                    new() { Key = "model", Label = "模型(留空默认)", Type = FlowParamType.Text, Default = "" },
+                    new() { Key = "var", Label = "优化建议存入变量", Type = FlowParamType.Text, Default = "AI优化建议" }
                 }
             });
 
@@ -881,7 +938,11 @@ namespace WindowSpy
                 "ai_ask" => $"→{S("var")}",
                 "ai_branch" => "AI答是/否",
                 "ai_execute" => "AI选A/B/C",
+                "ai_daily_report" => "AI复盘日报",
+                "ai_optimize" => $"AI优化{S("strategy")}",
                 "ban_check" => "全屏关键词",
+                "monitor_tp_sl" => $"止盈{S("takeProfit")}%/止损{S("stopLoss")}%/回撤{S("trailing")}%",
+                "backtest" => $"回测{S("strategy")} {S("capital")}本金",
                 "lua_script" => "Lua " + FirstLine(S("code"), 24),
                 "python_script" => "Py " + FirstLine(S("code"), 24),
                 "subflow" => "🧩 " + (string.IsNullOrWhiteSpace(S("modname")) ? "未选择模块" : Trunc(S("modname"), 14)),
