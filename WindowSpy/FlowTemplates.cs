@@ -25,7 +25,8 @@ namespace WindowSpy
             LoopForever(), AnnounceOnly(), RelistLoop(), MailRecycle(),
             LuaCustomPick(), PythonStatsReport(), LuaConditionBranch(),
             AiSmartBuy(), AiHoldManager(), AiQuantFull(), MultiStrategyTest(), LuaPositionSizing(), MultiItemPortfolio(),
-            AiWatch()
+            AiWatch(), BacktestOptimize(), TrailingStopLoop(),
+            AiAutopilotFlagship(), AdaptiveStrategyRotate(), MarketMakingGrid()
         };
 
         public static Template ByKey(string key)
@@ -1308,6 +1309,248 @@ log('info', string.format('Lua仓位：余额%.0f 单价%.0f 敞口%.0f → 买�
                     "前置条件：「行情与AI」页填好 DeepSeek API Key；无需任何游戏坐标，联网就能跑",
                     "AI点评原文存在 {AI点评} 变量里；想改播报频率改「延时等待」的60秒，改选品门槛改选品节点",
                     "听见两声铃+看到AI点评再手动进场；上班/夜间蹲机会神器，F12随时停止"
+                });
+        }
+
+        // ================= ㉒ 回测优化·AI参数调优（拉行情→回测→AI优化建议，零买卖） =================
+        public static Template BacktestOptimize()
+        {
+            var b = new B("回测优化AI参数调优");
+            var start = b.N("start");
+            var note = b.N("note");
+            note.Params["text"] = "回测优化台：拉一次行情→用历史K线回测当前策略的收益率/胜率/最大回撤→AI分析并给出止盈止损参数优化建议。全程不碰游戏，纯网络+AI。先跑这个选好参数，再去跑实盘模板。";
+            var fetch = b.N("fetch_quotes");
+            var backtest = b.N("backtest");
+            backtest.Params["strategy"] = "SMART";
+            backtest.Params["takeProfit"] = "8";
+            backtest.Params["stopLoss"] = "5";
+            backtest.Params["trailing"] = "3";
+            var aiOpt = b.N("ai_optimize");
+            aiOpt.Params["strategy"] = "SMART";
+            var log = b.N("log_msg");
+            log.Params["text"] = "📊 回测结果：收益{回测收益率}% 胜率{回测胜率}% 交易{回测交易数}笔 回撤{回测最大回撤}% 盈亏比{回测盈亏比}\n🤖 AI优化建议：\n{AI优化建议}";
+            log.Params["level"] = "动作";
+            var end = b.N("end");
+
+            b.L(start, "", note); b.L(note, "", fetch); b.L(fetch, "", backtest);
+            b.L(backtest, "", aiOpt); b.L(aiOpt, "", log); b.L(log, "", end);
+
+            return b.Finish("backtest_optimize", "㉒回测优化·AI参数调优",
+                "拉行情→历史K线回测策略表现→AI分析给出止盈止损参数优化建议，零买卖纯分析",
+                new List<string>
+                {
+                    "前置条件：「行情与AI」页填好 DeepSeek API Key；无需游戏坐标，联网就能跑",
+                    "回测用的是每个子弹的5分钟历史K线，模拟从周期起点买入、按止盈止损规则卖出的收益",
+                    "AI建议会给出具体的止盈%/止损%/移动止盈回撤%数值，把这些参数填到实盘模板的「移动止盈止损」节点里"
+                });
+        }
+
+        // ================= ㉓ 移动止盈·智能止损闭环（选品→买入→盯盘移动止盈→卖出补货，999轮） =================
+        public static Template TrailingStopLoop()
+        {
+            var b = new B("移动止盈智能止损闭环");
+            var start = b.N("start");
+            var note = b.N("note");
+            note.Params["text"] = "移动止盈闭环：999轮循环——领币→选品→买入→盯盘（移动止盈止损节点：固定止盈8%+止损5%+浮盈回撤3%即卖）→卖出上架→补货。利润不回吐，到顶自动落袋。坐标需自行点选标定。";
+            var ban = b.N("ban_check");
+            var loop = b.N("loop_n"); loop.Params["count"] = "999";
+            var fetch = b.N("fetch_quotes");
+            var pick = b.N("pick"); pick.Params["strategy"] = "SMART"; pick.Params["minprofit"] = "3";
+            var buy = b.N("buy");
+            var monitor = b.N("monitor_tp_sl");
+            monitor.Params["takeProfit"] = "8";
+            monitor.Params["stopLoss"] = "5";
+            monitor.Params["trailing"] = "3";
+            var sell = b.N("sell");
+            var wait = b.N("delay"); wait.Params["sec"] = "5";
+            var end = b.N("end");
+
+            b.L(start, "", note); b.L(note, "", ban);
+            b.L(ban, "safe", loop); b.L(ban, "hit", end);
+            b.L(loop, "body", fetch); b.L(fetch, "", pick);
+            b.L(pick, "ok", buy); b.L(pick, "miss", wait);
+            b.L(buy, "", monitor);
+            b.L(monitor, "sell", sell); b.L(monitor, "hold", wait);
+            b.L(sell, "", wait);
+            // wait 隐式回流 loop
+            b.L(loop, "done", end);
+
+            return b.Finish("trailing_stop_loop", "㉓移动止盈·智能止损闭环",
+                "999轮：选品买入→移动止盈止损盯盘（止盈8%/止损5%/回撤3%）→卖出→补货，利润不回吐",
+                new List<string>
+                {
+                    "核心是「移动止盈止损」节点：浮盈到8%直接卖，亏5%止损，盈利后从峰值回撤3%也卖——锁住利润不回吐",
+                    "坐标需在游戏里点选标定：买入按钮、卖出按钮；选品策略和利润门槛按需调整",
+                    "峰值浮盈自动记录在变量里，跨循环不丢；想更保守把止盈调6%、回撤调2%"
+                });
+        }
+
+        // ================= ㉔ AI全自主旗舰交易系统（回测→优化→实盘→复盘，一条龙全自动） =================
+        public static Template AiAutopilotFlagship()
+        {
+            var b = new B("AI全自主旗舰交易系统");
+            var start = b.N("start");
+            var note1 = b.N("note");
+            note1.Params["text"] = "AI全自主旗舰：先拉行情做一次回测→AI优化止盈止损参数→然后999轮全自动实盘（AI把关买入+移动止盈止损卖出）→结束时AI生成复盘日报。从验证到交易到复盘一条龙，AI全程决策。需填DeepSeek Key。坐标需标定。";
+
+            // —— 第一阶段：回测+优化（只跑一次）——
+            var fetch0 = b.N("fetch_quotes");
+            var bt = b.N("backtest");
+            bt.Params["strategy"] = "SMART"; bt.Params["takeProfit"] = "8"; bt.Params["stopLoss"] = "5"; bt.Params["trailing"] = "3";
+            var aiOpt = b.N("ai_optimize"); aiOpt.Params["strategy"] = "SMART";
+            var logOpt = b.N("log_msg");
+            logOpt.Params["text"] = "🤖 AI优化完成：收益{回测收益率}% 胜率{回测胜率}% 回撤{回测最大回撤}%\n建议：{AI优化建议}\n→ 开始999轮实盘";
+            logOpt.Params["level"] = "动作";
+
+            // —— 第二阶段：999轮实盘 ——
+            var ban = b.N("ban_check");
+            var loop = b.N("loop_n"); loop.Params["count"] = "999";
+            var fetch = b.N("fetch_quotes");
+            var pick = b.N("pick"); pick.Params["strategy"] = "SMART"; pick.Params["minprofit"] = "3";
+
+            var aiBuy = b.N("ai_branch");
+            aiBuy.Params["question"] = "当前选品：{选品品名} 现价{选品现价} 预期税后利润{选品预期利润}% 份数{选品份数}。结合当前行情，是否值得现在买入？只回答是或否";
+
+            var buy = b.N("buy");
+            var monitor = b.N("monitor_tp_sl");
+            monitor.Params["takeProfit"] = "8"; monitor.Params["stopLoss"] = "5"; monitor.Params["trailing"] = "3";
+            var sell = b.N("sell");
+            var logSell = b.N("log_msg");
+            logSell.Params["text"] = "✅ 卖出完成：{选品品名} ×{选品份数}，进入下一轮";
+            logSell.Params["level"] = "动作";
+            var wait = b.N("delay"); wait.Params["sec"] = "5";
+
+            // —— 第三阶段：复盘日报 ——
+            var aiReport = b.N("ai_daily_report");
+            var logReport = b.N("log_msg");
+            logReport.Params["text"] = "📋 今日AI复盘日报：\n{AI日报}";
+            logReport.Params["level"] = "动作";
+            var end = b.N("end");
+
+            // 连线
+            b.L(start, "", note1); b.L(note1, "", fetch0); b.L(fetch0, "", bt);
+            b.L(bt, "", aiOpt); b.L(aiOpt, "", logOpt); b.L(logOpt, "", ban);
+            b.L(ban, "safe", loop); b.L(ban, "hit", end);
+            b.L(loop, "body", fetch); b.L(fetch, "", pick);
+            b.L(pick, "ok", aiBuy); b.L(pick, "miss", wait);
+            b.L(aiBuy, "yes", buy); b.L(aiBuy, "no", wait);
+            b.L(buy, "", monitor);
+            b.L(monitor, "sell", sell); b.L(monitor, "hold", wait);
+            b.L(sell, "", logSell); b.L(logSell, "", wait);
+            // wait 隐式回流 loop
+            b.L(loop, "done", aiReport); b.L(aiReport, "", logReport); b.L(logReport, "", end);
+
+            return b.Finish("ai_autopilot_flagship", "㉔AI全自主旗舰交易系统",
+                "回测验证→AI优化参数→999轮AI把关实盘（移动止盈止损）→AI复盘日报，一条龙全自动",
+                new List<string>
+                {
+                    "前置：「行情与AI」页填好 DeepSeek API Key；标定买入/卖出按钮坐标",
+                    "第一阶段只跑一次：拉行情回测当前策略，AI给出止盈止损优化建议（存在{AI优化建议}）",
+                    "第二阶段999轮：每轮AI先把关买不买，批准才买；买入后移动止盈止损自动盯盘卖出",
+                    "第三阶段：循环结束AI生成今日复盘日报，打印到日志；这是目前最强的全自动模板"
+                });
+        }
+
+        // ================= ㉕ 多策略自适应轮动（按行情状态自动切换6策略） =================
+        public static Template AdaptiveStrategyRotate()
+        {
+            var b = new B("多策略自适应轮动");
+            var start = b.N("start");
+            var note = b.N("note");
+            note.Params["text"] = "多策略自适应轮动：每轮先拉行情→用「如果…否则」判断当前市场状态（趋势/震荡/超跌）→自动切换对应策略选品→买入→移动止盈止损→卖出。牛市追涨、震荡套利、跌市抄底，一招通吃。坐标需标定。";
+
+            var ban = b.N("ban_check");
+            var loop = b.N("loop_n"); loop.Params["count"] = "999";
+            var fetch = b.N("fetch_quotes");
+
+            // 用选品结果里的位置变量判断市场状态（需要先拿一个基准行情算RSI/位置）
+            // 简化：直接用 hold_quote 取一个活跃子弹的RSI和位置来判断大盘
+            var hold = b.N("hold_quote");
+            hold.Params["name"] = "{选品品名}"; hold.Params["ma"] = "20"; hold.Params["prefix"] = "大盘";
+
+            // 判断1：RSI>70 且 位置>0.7 → 趋势市 → RISE
+            var ifTrend = b.N("if");
+            ifTrend.Params["expr"] = "{大盘RSI} > 65";
+            var pickRise = b.N("pick"); pickRise.Params["strategy"] = "RISE"; pickRise.Params["minprofit"] = "3";
+
+            // 判断2：RSI<35 → 超跌 → DIP
+            var ifDip = b.N("if");
+            ifDip.Params["expr"] = "{大盘RSI} < 35";
+            var pickDip = b.N("pick"); pickDip.Params["strategy"] = "DIP"; pickDip.Params["minprofit"] = "3";
+
+            // 默认 → 震荡 → RANGE
+            var pickRange = b.N("pick"); pickRange.Params["strategy"] = "RANGE"; pickRange.Params["minprofit"] = "2";
+
+            var buy = b.N("buy");
+            var monitor = b.N("monitor_tp_sl");
+            monitor.Params["takeProfit"] = "6"; monitor.Params["stopLoss"] = "4"; monitor.Params["trailing"] = "2";
+            var sell = b.N("sell");
+            var wait = b.N("delay"); wait.Params["sec"] = "10";
+            var end = b.N("end");
+
+            b.L(start, "", note); b.L(note, "", ban);
+            b.L(ban, "safe", loop); b.L(ban, "hit", end);
+            b.L(loop, "body", fetch); b.L(fetch, "", hold); b.L(hold, "", ifTrend);
+            b.L(ifTrend, "true", pickRise); b.L(ifTrend, "false", ifDip);
+            b.L(ifDip, "true", pickDip); b.L(ifDip, "false", pickRange);
+            b.L(pickRise, "ok", buy); b.L(pickRise, "miss", wait);
+            b.L(pickDip, "ok", buy); b.L(pickDip, "miss", wait);
+            b.L(pickRange, "ok", buy); b.L(pickRange, "miss", wait);
+            b.L(buy, "", monitor);
+            b.L(monitor, "sell", sell); b.L(monitor, "hold", wait);
+            b.L(sell, "", wait);
+            b.L(loop, "done", end);
+
+            return b.Finish("adaptive_rotate", "㉕多策略自适应轮动",
+                "根据行情RSI自动切换策略：RSI>65用RISE追涨、RSI<35用DIP抄底、其余用RANGE区间套利",
+                new List<string>
+                {
+                    "核心思路：不把鸡蛋放一个策略篮子里，让系统根据市场温度自己选打法",
+                    "判断逻辑：用hold_quote取一个基准子弹的RSI，>65算趋势市用RISE，<35算超跌用DIP，中间用RANGE",
+                    "移动止盈参数设得偏保守（止盈6%/止损4%/回撤2%），因为轮动策略追求胜率不追求单笔大赚",
+                    "想切换判断阈值改「如果…否则」节点的表达式，想换策略改三个pick节点的下拉框"
+                });
+        }
+
+        // ================= ㉖ 智能做市网格（区间低买高挂反复做T，窄止盈快进快出） =================
+        public static Template MarketMakingGrid()
+        {
+            var b = new B("智能做市网格");
+            var start = b.N("start");
+            var note = b.N("note");
+            note.Params["text"] = "智能做市网格：专挑震荡子弹，低位买入→窄止盈（3%）快速卖出→等回落到低位再买，反复做T赚价差。配合RANGE策略选品，止盈设窄、止损设宽，靠高胜率复利。坐标需标定。";
+
+            var ban = b.N("ban_check");
+            var loop = b.N("loop_n"); loop.Params["count"] = "0"; // 无限网格
+            var fetch = b.N("fetch_quotes");
+            var pick = b.N("pick"); pick.Params["strategy"] = "RANGE"; pick.Params["minprofit"] = "2";
+
+            var buy = b.N("buy");
+            var monitor = b.N("monitor_tp_sl");
+            monitor.Params["takeProfit"] = "3";   // 窄止盈：赚3%就跑
+            monitor.Params["stopLoss"] = "8";      // 宽止损：给震荡留空间
+            monitor.Params["trailing"] = "0";      // 关掉移动止盈，网格就是要快进快出
+            var sell = b.N("sell");
+            var waitLow = b.N("delay"); waitLow.Params["sec"] = "30"; // 卖出后等30秒让价格回落
+            var end = b.N("end");
+
+            b.L(start, "", note); b.L(note, "", ban);
+            b.L(ban, "safe", loop); b.L(ban, "hit", end);
+            b.L(loop, "body", fetch); b.L(fetch, "", pick);
+            b.L(pick, "ok", buy); b.L(pick, "miss", waitLow);
+            b.L(buy, "", monitor);
+            b.L(monitor, "sell", sell); b.L(monitor, "hold", waitLow);
+            b.L(sell, "", waitLow);
+            b.L(loop, "done", end);
+
+            return b.Finish("market_making_grid", "㉖智能做市网格",
+                "RANGE选品+窄止盈3%快进快出，卖出后等回落再买，反复做T赚价差，靠高胜率复利",
+                new List<string>
+                {
+                    "做市网格的精髓：不追涨不杀跌，只在震荡区间里反复薅羊毛，赚3%就跑",
+                    "止盈设3%（窄）、止损设8%（宽）、关闭移动止盈——因为网格就是要快进快出不等趋势",
+                    "循环设0=无限做T，卖出后等30秒让价格回落再买，避免追高",
+                    "适合波动大但有箱体的子弹；单边上涨行情会卖飞，此时切换到RISE策略模板"
                 });
         }
     }
