@@ -1,0 +1,25 @@
+# 构建产物
+bin/
+obj/
+publish/
+
+# 用户本地配置
+*.user
+.vs/
+
+# 运行时授权与密钥（绝不上传）
+license.json
+private_key.json
+public_key.json
+*.dat
+
+# 大体积依赖与环境
+Scripts/dist/
+Scripts/build/
+Scripts/__pycache__/
+*.onnx
+jietu/
+
+# 系统文件
+Thumbs.db
+.DS_Store

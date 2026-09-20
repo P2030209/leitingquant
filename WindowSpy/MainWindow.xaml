@@ -1,0 +1,524 @@
+<Window
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:shell="clr-namespace:System.Windows.Shell;assembly=PresentationFramework"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" mc:Ignorable="d" x:Class="WindowSpy.MainWindow"
+        Title="雷霆三角洲量化系统" Height="700" Width="1080" WindowStartupLocation="CenterScreen" MinWidth="1080" MinHeight="600" MaxWidth="1080"
+        Background="{StaticResource BgWindowBrush}" Foreground="{StaticResource TextPrimaryBrush}"
+        FontFamily="Microsoft YaHei UI, Segoe UI"
+        PreviewKeyDown="MainWindow_PreviewKeyDown">
+    <shell:WindowChrome.WindowChrome>
+        <shell:WindowChrome CaptionHeight="46" ResizeBorderThickness="6" GlassFrameThickness="0" CornerRadius="0" UseAeroCaptionButtons="False"/>
+    </shell:WindowChrome.WindowChrome>
+
+    <Window.Resources>
+        <!-- 左侧导航单选项：游戏 HUD 风格，选中=橙色文字+橙色竖条 -->
+        <Style x:Key="NavRadio" TargetType="RadioButton">
+            <Setter Property="GroupName" Value="Nav"/>
+            <Setter Property="Height" Value="44"/>
+            <Setter Property="Margin" Value="0,2"/>
+            <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="RadioButton">
+                        <Border x:Name="bd" Background="Transparent" CornerRadius="6" Padding="0">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="3"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <Border x:Name="bar" Width="3" HorizontalAlignment="Left" Background="Transparent" CornerRadius="2"/>
+                                <ContentPresenter Grid.Column="1" Margin="12,0,0,0" VerticalAlignment="Center" HorizontalAlignment="Left"/>
+                            </Grid>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="bd" Property="Background" Value="#22FF8A2A"/>
+                                <Setter TargetName="bar" Property="Background" Value="{StaticResource AccentBrush}"/>
+                                <Setter Property="Foreground" Value="{StaticResource AccentBrush}"/>
+                                <Setter Property="FontWeight" Value="Bold"/>
+                            </Trigger>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="bd" Property="Background" Value="#14FFFFFF"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="46"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- ============ 自定义标题栏 ============ -->
+        <Border Grid.Row="0" Background="{StaticResource BgHeaderBrush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,0,1">
+            <DockPanel LastChildFill="True" Margin="14,0,0,0">
+                <Border DockPanel.Dock="Left" Width="26" Height="26" CornerRadius="6" Background="{StaticResource AccentBrush}" VerticalAlignment="Center">
+                    <TextBlock Text="Δ" Foreground="White" FontWeight="Bold" FontSize="15" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                </Border>
+                <TextBlock DockPanel.Dock="Left" Text="雷霆三角洲量化系统" FontWeight="Bold" FontSize="14" Margin="10,0,0,0" VerticalAlignment="Center"/>
+                <Border DockPanel.Dock="Left" Background="{StaticResource AccentMutedBrush}" CornerRadius="9" Padding="8,2" Margin="10,0,0,0" VerticalAlignment="Center">
+                    <TextBlock x:Name="TitleVersionText" FontSize="10" Foreground="{StaticResource AccentBrush}"/>
+                </Border>
+                <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" WindowChrome.IsHitTestVisibleInChrome="True">
+                    <Button x:Name="CaptionMinButton" Style="{StaticResource CaptionButton}" Width="42" Content="—" FontSize="11" Click="CaptionMin_Click" ToolTip="最小化"/>
+                    <Button x:Name="CaptionCloseButton" Style="{StaticResource CaptionCloseButton}" Width="42" Content="✕" FontSize="11" Click="CaptionClose_Click" ToolTip="关闭"/>
+                </StackPanel>
+                <Grid Background="Transparent"/>
+            </DockPanel>
+        </Border>
+
+        <!-- ============ 内容区 ============ -->
+        <Grid Grid.Row="1" Margin="12,10,12,12">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <!-- 窗口绑定卡片 -->
+            <Border Style="{StaticResource CardBorder}" Grid.Row="0" Padding="14,10" Margin="0,0,0,8">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <!-- 绑定A -->
+                    <StackPanel Grid.Column="0" Orientation="Horizontal">
+                        <Border Width="28" Height="28" CornerRadius="14" Background="{StaticResource BgElevatedBrush}" BorderBrush="{StaticResource BorderLightBrush}" BorderThickness="1"
+                                MouseLeftButtonDown="BindA_MouseLeftButtonDown" Cursor="Hand" VerticalAlignment="Center">
+                            <Viewbox Stretch="Uniform" Margin="4">
+                                <Grid>
+                                    <Ellipse Width="68" Height="68" Stroke="{StaticResource AccentBrush}" StrokeThickness="3"/>
+                                    <Ellipse Width="40" Height="40" Stroke="{StaticResource AccentBrush}" StrokeThickness="3"/>
+                                    <Ellipse Width="14" Height="14" Fill="{StaticResource AccentBrush}"/>
+                                </Grid>
+                            </Viewbox>
+                        </Border>
+                        <StackPanel Orientation="Vertical" Margin="10,0,0,0" VerticalAlignment="Center">
+                            <TextBlock Text="绑定A（按住拖到目标窗口）" Style="{StaticResource SecondaryText}" FontSize="11"/>
+                            <StackPanel Orientation="Horizontal" Margin="0,3,0,0">
+                                <TextBlock Text="窗口A：" Style="{StaticResource SecondaryText}" Margin="0,0,4,0" VerticalAlignment="Center"/>
+                                <TextBlock x:Name="BoundATitle" VerticalAlignment="Center" Text="" Width="260" TextWrapping="Wrap" FontWeight="SemiBold"/>
+                            </StackPanel>
+                        </StackPanel>
+                    </StackPanel>
+                    <Separator Grid.Column="1" Width="1" Height="34" VerticalAlignment="Center" Margin="14,0"/>
+                    <!-- 绑定B -->
+                    <StackPanel Grid.Column="2" Orientation="Horizontal">
+                        <Border Width="28" Height="28" CornerRadius="14" Background="{StaticResource BgElevatedBrush}" BorderBrush="{StaticResource BorderLightBrush}" BorderThickness="1"
+                                MouseLeftButtonDown="BindB_MouseLeftButtonDown" Cursor="Hand" VerticalAlignment="Center">
+                            <Viewbox Stretch="Uniform" Margin="4">
+                                <Grid>
+                                    <Ellipse Width="68" Height="68" Stroke="{StaticResource AccentBrush}" StrokeThickness="3"/>
+                                    <Ellipse Width="40" Height="40" Stroke="{StaticResource AccentBrush}" StrokeThickness="3"/>
+                                    <Ellipse Width="14" Height="14" Fill="{StaticResource AccentBrush}"/>
+                                </Grid>
+                            </Viewbox>
+                        </Border>
+                        <StackPanel Orientation="Vertical" Margin="10,0,0,0" VerticalAlignment="Center">
+                            <TextBlock Text="绑定B（按住拖到目标窗口·双开）" Style="{StaticResource SecondaryText}" FontSize="11"/>
+                            <StackPanel Orientation="Horizontal" Margin="0,3,0,0">
+                                <TextBlock Text="窗口B：" Style="{StaticResource SecondaryText}" Margin="0,0,4,0" VerticalAlignment="Center"/>
+                                <TextBlock x:Name="BoundBTitle" VerticalAlignment="Center" Text="" Width="260" TextWrapping="Wrap" FontWeight="SemiBold"/>
+                            </StackPanel>
+                        </StackPanel>
+                    </StackPanel>
+                </Grid>
+            </Border>
+
+            <!-- 主体：左导航 + 右页面 -->
+            <Grid Grid.Row="1" Margin="0,0,0,0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="150"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- 左侧导航栏 -->
+                <Border Grid.Column="0" Style="{StaticResource CardBorder}" Padding="8,10" Margin="0,0,8,0">
+                    <DockPanel>
+                        <StackPanel DockPanel.Dock="Top">
+                            <TextBlock Text="雷霆控制台" FontWeight="Bold" FontSize="12" Foreground="{StaticResource AccentBrush}" Margin="12,2,0,10"/>
+                            <RadioButton x:Name="NavConsole" Style="{StaticResource NavRadio}" IsChecked="True" Checked="Nav_Changed" Tag="console" Content="⚙ 流程运行台"/>
+                            <RadioButton x:Name="NavData" Style="{StaticResource NavRadio}" Checked="Nav_Changed" Tag="data" Content="📡 行情与AI"/>
+                            <RadioButton x:Name="NavAbout" Style="{StaticResource NavRadio}" Checked="Nav_Changed" Tag="about" Content="ℹ 关于与帮助"/>
+                        </StackPanel>
+                        <StackPanel DockPanel.Dock="Bottom" Margin="10,0,8,8">
+                            <TextBlock Text="F9 呼出/隐藏" FontSize="10" Foreground="{StaticResource TextSecondaryBrush}"/>
+                            <TextBlock Text="F12 紧急停止" FontSize="10" Foreground="#FF4D55" Margin="0,3,0,0"/>
+                        </StackPanel>
+                        <Grid/>
+                    </DockPanel>
+                </Border>
+
+                <!-- 右侧页面区 -->
+                <Grid Grid.Column="1">
+
+                    <!-- ========== 页面一：流程运行台 ========== -->
+                    <Grid x:Name="PageConsole">
+                        <ScrollViewer VerticalScrollBarVisibility="Auto">
+                            <StackPanel Margin="2,0,0,0">
+                                <!-- ===== 流程工程运行台 ===== -->
+                                <Border Style="{StaticResource CardBorder}" Padding="10" Margin="0,0,0,10">
+                                    <StackPanel>
+                                        <TextBlock Text="⚙ 流程工程运行台" FontWeight="Bold" Style="{StaticResource SectionTitleText}"/>
+                                        <WrapPanel Margin="0,8,0,0">
+                                            <TextBlock Text="工程：" VerticalAlignment="Center" Style="{StaticResource SecondaryText}"/>
+                                            <ComboBox x:Name="FlowProjectCombo" Width="240" Height="30" VerticalContentAlignment="Center"
+                                                      ToolTip="flows 目录下的流程工程；在流程工坊中新建/保存后点「刷新」"/>
+                                            <Button Content="刷新" Width="56" Height="30" Margin="6,0,0,0" Click="FlowProjRefresh_Click"/>
+                                            <Button Content="新建工程" Width="86" Height="30" Margin="6,0,0,0" Click="FlowProjNew_Click"/>
+                                            <Button Content="编辑工程" Width="86" Height="30" Margin="6,0,0,0" Click="FlowProjEdit_Click"
+                                                    ToolTip="在流程工坊中打开当前选中工程；出错暂停时也可改节点保存后继续"/>
+                                            <Rectangle Width="1" Margin="10,2" Fill="{StaticResource BorderBrush}"/>
+                                            <Button x:Name="FlowRunBtn" Content="▶ 启动" Width="92" Height="30" Style="{StaticResource SuccessButton}" Click="FlowRun_Click"/>
+                                            <Button x:Name="FlowPauseBtn" Content="⏸ 暂停" Width="76" Height="30" Margin="6,0,0,0" Click="FlowPause_Click" IsEnabled="False"/>
+                                            <Button x:Name="FlowResumeBtn" Content="▶ 继续" Width="76" Height="30" Margin="6,0,0,0" Click="FlowResume_Click" IsEnabled="False"/>
+                                            <Button x:Name="FlowStopBtn" Content="■ 停止(F12)" Width="98" Height="30" Margin="6,0,0,0" Style="{StaticResource DangerButton}" Click="FlowStop_Click" IsEnabled="False"/>
+                                        </WrapPanel>
+                                        <Grid Margin="0,8,0,0">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <Ellipse x:Name="FlowStateLamp" Width="10" Height="10" Fill="#5A6472" VerticalAlignment="Center"/>
+                                            <TextBlock x:Name="FlowStatusText" Grid.Column="1" Margin="8,0,0,0" VerticalAlignment="Center"
+                                                       Foreground="{StaticResource TextSecondaryBrush}" FontSize="12"
+                                                       Text="状态：空闲 · 启动后窗口自动隐藏，F9 全局呼出/隐藏，F12 急停"/>
+                                        </Grid>
+
+                                        <!-- 定时任务（对选中工程生效，每日循环） -->
+                                        <Border Margin="0,10,0,0" Padding="10,8" Background="{StaticResource InputBgBrush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="1" CornerRadius="4">
+                                            <StackPanel>
+                                                <TextBlock Text="⏰ 定时任务（对上方选中工程生效，到点每日自动执行）" FontWeight="Bold" FontSize="12" Foreground="{StaticResource AccentBrush}"/>
+                                                <WrapPanel Margin="0,8,0,0">
+                                                    <TextBlock Text="定时启动" VerticalAlignment="Center" Style="{StaticResource SecondaryText}" Margin="0,0,6,0"/>
+                                                    <TextBox x:Name="SchedStartH" Width="26" MaxLength="2" Text="08" HorizontalContentAlignment="Center" Padding="0,4" PreviewTextInput="NumberOnly_PreviewTextInput"/>
+                                                    <TextBlock Text=":" VerticalAlignment="Center" Margin="2,0" Style="{StaticResource SecondaryText}"/>
+                                                    <TextBox x:Name="SchedStartM" Width="26" MaxLength="2" Text="00" HorizontalContentAlignment="Center" Padding="0,4" PreviewTextInput="NumberOnly_PreviewTextInput"/>
+                                                    <Button x:Name="SchedStartBtn" Content="启用启动" Width="74" Height="28" Margin="8,0,0,0" Click="SchedStartToggle_Click"/>
+                                                    <TextBlock Text="定时停止" VerticalAlignment="Center" Style="{StaticResource SecondaryText}" Margin="20,0,6,0"/>
+                                                    <TextBox x:Name="SchedStopH" Width="26" MaxLength="2" Text="" HorizontalContentAlignment="Center" Padding="0,4" PreviewTextInput="NumberOnly_PreviewTextInput"/>
+                                                    <TextBlock Text=":" VerticalAlignment="Center" Margin="2,0" Style="{StaticResource SecondaryText}"/>
+                                                    <TextBox x:Name="SchedStopM" Width="26" MaxLength="2" Text="" HorizontalContentAlignment="Center" Padding="0,4" PreviewTextInput="NumberOnly_PreviewTextInput"/>
+                                                    <Button x:Name="SchedStopBtn" Content="启用停止" Width="74" Height="28" Margin="8,0,0,0" Click="SchedStopToggle_Click"/>
+                                                    <TextBlock x:Name="SchedStatusText" Text="定时：未启用" VerticalAlignment="Center" Margin="16,0,0,0" Foreground="{StaticResource TextSecondaryBrush}" FontSize="11"/>
+                                                </WrapPanel>
+                                            </StackPanel>
+                                        </Border>
+                                    </StackPanel>
+                                </Border>
+
+                                <TextBlock Text="基本参数（旧托管引擎策略与坐标标定，进阶使用）" FontWeight="Bold" Style="{StaticResource SectionTitleText}"/>
+                                <WrapPanel Margin="0,6,0,0">
+                                    <TextBlock Margin="0,0,4,0" VerticalAlignment="Center" Text="选品策略" Style="{StaticResource SecondaryText}"/>
+                                    <ComboBox x:Name="WzStrategyBox" Width="185" Height="28" VerticalContentAlignment="Center"
+                                              ToolTip="智能综合=税后预期利润+折价+振幅，按余额可买份数计算预期总利润额排序（利益最大化）；其余为单因子策略">
+                                        <ComboBoxItem Content="SMART 智能综合(总利润最大)" IsSelected="True"/>
+                                        <ComboBoxItem Content="PROFIT 税后利润(纯利润)"/>
+                                        <ComboBoxItem Content="RISE 追涨(涨幅最高)"/>
+                                        <ComboBoxItem Content="DIP 抄底(低于均价%)"/>
+                                        <ComboBoxItem Content="REBOUND 超跌反弹(跌幅+低位)"/>
+                                        <ComboBoxItem Content="RANGE 空间(区间振幅%)"/>
+                                    </ComboBox>
+                                    <TextBlock Margin="12,0,4,0" VerticalAlignment="Center" Text="买入溢价%" Style="{StaticResource SecondaryText}"/>
+                                    <TextBox x:Name="WzBuyPremium" Width="44" Height="28" Text="2" ToolTip="现价低于均线该百分比才买入（越大越保守）"/>
+                                    <TextBlock Margin="12,0,4,0" VerticalAlignment="Center" Text="均线周期" Style="{StaticResource SecondaryText}"/>
+                                    <TextBox x:Name="WzMaPeriod" Width="40" Height="28" Text="20" ToolTip="买入参照的MA周期"/>
+                                    <TextBlock Margin="12,0,4,0" VerticalAlignment="Center" Text="止盈%" Style="{StaticResource SecondaryText}"/>
+                                    <TextBox x:Name="WzTakeProfit" Width="44" Height="28" Text="10" ToolTip="现价高于买入价该百分比自动点卖出"/>
+                                    <TextBlock Margin="12,0,4,0" VerticalAlignment="Center" Text="止损%" Style="{StaticResource SecondaryText}"/>
+                                    <TextBox x:Name="WzStopLoss" Width="44" Height="28" Text="0" ToolTip="0=不止损；填5表示跌破买入价5%自动卖出，止损子弹自动冷却"/>
+                                    <TextBlock Margin="12,0,4,0" VerticalAlignment="Center" Text="空仓间隔(秒)" Style="{StaticResource SecondaryText}"/>
+                                    <TextBox x:Name="WzIntervalSec" Width="44" Height="28" Text="60" ToolTip="空仓时每轮行情刷新间隔，建议≥60秒"/>
+                                </WrapPanel>
+                                <WrapPanel Margin="0,6,0,0">
+                                    <TextBlock Margin="0,0,4,0" VerticalAlignment="Center" Text="最低利润%" Style="{StaticResource SecondaryText}"/>
+                                    <TextBox x:Name="WzMinProfit" Width="44" Height="28" Text="3" ToolTip="税后往返预期利润率低于该值的子弹不买"/>
+                                    <TextBlock Margin="12,0,4,0" VerticalAlignment="Center" Text="RSI低于" Style="{StaticResource SecondaryText}"/>
+                                    <TextBox x:Name="WzRsiMax" Width="40" Height="28" Text="70" ToolTip="RSI 高于该值不买入，防追在顶部"/>
+                                    <TextBlock Margin="12,0,4,0" VerticalAlignment="Center" Text="移动止盈%" Style="{StaticResource SecondaryText}"/>
+                                    <TextBox x:Name="WzTrailing" Width="44" Height="28" Text="0" ToolTip="0=关闭；填5表示持仓最高价回撤5%且仍盈利时卖出"/>
+                                    <TextBlock Margin="12,0,4,0" VerticalAlignment="Center" Text="持仓超时轮" Style="{StaticResource SecondaryText}"/>
+                                    <TextBox x:Name="WzMaxHoldRounds" Width="40" Height="28" Text="0" ToolTip="0=不限；持仓达到该轮数强制卖出释放资金"/>
+                                    <TextBlock Margin="12,0,4,0" VerticalAlignment="Center" Text="持仓盯盘秒" Style="{StaticResource SecondaryText}"/>
+                                    <TextBox x:Name="WzHoldIntervalSec" Width="44" Height="28" Text="20" ToolTip="持仓时更密集盯盘，方便快速止盈卖出（比人快）"/>
+                                </WrapPanel>
+                                <WrapPanel Margin="0,6,0,0">
+                                    <TextBlock Margin="0,0,4,0" VerticalAlignment="Center" Text="交易行入口" Style="{StaticResource SecondaryText}"/>
+                                    <TextBox x:Name="WzTradeX" Width="46" Height="28" Text="" ToolTip="大厅顶部「交易行」按钮X(窗口相对)，可选；配置后每轮自动确保进入交易行"/>
+                                    <TextBox x:Name="WzTradeY" Width="46" Height="28" Margin="4,0,0,0" ToolTip="交易行入口Y(窗口相对)"/>
+                                    <Button x:Name="WzPickTrade" Content="点选" Width="46" Height="28" Margin="4,0,0,0" Click="WzPickTrade_Click"/>
+                                    <TextBlock Margin="8,0,0,0" VerticalAlignment="Center" Text="(可选，停在大厅也能自动进交易行)" Foreground="#5A6472" FontSize="11"/>
+                                </WrapPanel>
+                                <WrapPanel Margin="0,6,0,0">
+                                    <TextBlock Margin="0,0,4,0" VerticalAlignment="Center" Text="买入点击" Style="{StaticResource SecondaryText}"/>
+                                    <TextBox x:Name="WzBuyX" Width="46" Height="28" Text="" ToolTip="买入按钮X(窗口相对)"/>
+                                    <TextBox x:Name="WzBuyY" Width="46" Height="28" Margin="4,0,0,0" ToolTip="买入按钮Y(窗口相对)"/>
+                                    <Button x:Name="WzPickBuy" Content="点选" Width="46" Height="28" Margin="4,0,0,0" Click="WzPickBuy_Click"/>
+                                    <TextBlock Margin="16,0,4,0" VerticalAlignment="Center" Text="卖出点击" Style="{StaticResource SecondaryText}"/>
+                                    <TextBox x:Name="WzSellX" Width="46" Height="28" ToolTip="卖出按钮X(窗口相对)"/>
+                                    <TextBox x:Name="WzSellY" Width="46" Height="28" Margin="4,0,0,0" ToolTip="卖出按钮Y(窗口相对)"/>
+                                    <Button x:Name="WzPickSell" Content="点选" Width="46" Height="28" Margin="4,0,0,0" Click="WzPickSell_Click"/>
+                                    <CheckBox x:Name="WzAiCheck" Content="AI确认" Margin="16,0,0,0" VerticalAlignment="Center" ToolTip="买入前问BUY/WAIT、持仓时问SELL/HOLD（模板在行情与AI页配置）"/>
+                                    <CheckBox x:Name="WzTurbo" Content="极速模式" Margin="16,0,0,0" VerticalAlignment="Center" ToolTip="并行拉取历史、点击短等待、封禁检测降频、持仓快轮询。比人快但拟人度低，建议与连跑休息配合"/>
+                                </WrapPanel>
+
+                                <!-- 搜索选中子弹 -->
+                                <Border Style="{StaticResource CardBorder}" Padding="10,8" Margin="0,8,0,0">
+                                    <StackPanel>
+                                        <CheckBox x:Name="WzSelectCheck" Content="交易前自动搜索选中子弹（买入/卖出前重新定位目标子弹）" VerticalAlignment="Center"/>
+                                        <WrapPanel Margin="0,8,0,0">
+                                            <TextBlock Margin="0,0,4,0" VerticalAlignment="Center" Text="搜索框" Style="{StaticResource SecondaryText}"/>
+                                            <TextBox x:Name="WzSearchX" Width="46" Height="28" ToolTip="行情搜索框X(窗口相对)"/>
+                                            <TextBox x:Name="WzSearchY" Width="46" Height="28" Margin="4,0,0,0" ToolTip="搜索框Y"/>
+                                            <Button Content="点选" Width="46" Height="28" Margin="4,0,0,0" Click="WzPickSearch_Click"/>
+                                            <TextBlock Margin="16,0,4,0" VerticalAlignment="Center" Text="搜索结果第一项" Style="{StaticResource SecondaryText}"/>
+                                            <TextBox x:Name="WzResultX" Width="46" Height="28" ToolTip="结果列表第一项X"/>
+                                            <TextBox x:Name="WzResultY" Width="46" Height="28" Margin="4,0,0,0" ToolTip="结果列表第一项Y"/>
+                                            <Button Content="点选" Width="46" Height="28" Margin="4,0,0,0" Click="WzPickResult_Click"/>
+                                        </WrapPanel>
+                                    </StackPanel>
+                                </Border>
+
+                                <!-- 钱包余额 + 仓位 -->
+                                <Border Style="{StaticResource CardBorder}" Padding="10,8" Margin="0,8,0,0">
+                                    <StackPanel>
+                                        <CheckBox x:Name="WzWalletCheck" Content="识别哈弗币余额，按余额算法决定买多少（利益最大化）" VerticalAlignment="Center"/>
+                                        <WrapPanel Margin="0,8,0,0">
+                                            <TextBlock Margin="0,0,4,0" VerticalAlignment="Center" Text="余额识别区" Style="{StaticResource SecondaryText}"/>
+                                            <TextBox x:Name="WzWalletRectBox" Width="150" Height="28" IsReadOnly="True" ToolTip="游戏内哈弗币数字所在区域（窗口相对 x,y,w,h）"/>
+                                            <Button Content="框选区域" Width="76" Height="28" Margin="4,0,0,0" Click="WzPickWallet_Click"/>
+                                            <Button Content="测试识别" Width="76" Height="28" Margin="4,0,0,0" Click="WzTestWallet_Click"/>
+                                            <TextBlock Margin="16,0,4,0" VerticalAlignment="Center" Text="单笔动用余额%" Style="{StaticResource SecondaryText}"/>
+                                            <TextBox x:Name="WzBudgetPct" Width="46" Height="28" Text="50" ToolTip="每笔最多用当前哈弗币余额的百分之多少买入"/>
+                                            <TextBlock Margin="12,0,4,0" VerticalAlignment="Center" Text="预留哈弗币" Style="{StaticResource SecondaryText}"/>
+                                            <TextBox x:Name="WzReserve" Width="70" Height="28" Text="0" ToolTip="始终保留不参与交易的余额"/>
+                                            <TextBlock Margin="12,0,4,0" VerticalAlignment="Center" Text="份数上限" Style="{StaticResource SecondaryText}"/>
+                                            <TextBox x:Name="WzMaxLots" Width="50" Height="28" Text="999" ToolTip="单笔买入份数硬上限"/>
+                                        </WrapPanel>
+                                    </StackPanel>
+                                </Border>
+
+                                <!-- 买入数量 +/− -->
+                                <Border Style="{StaticResource CardBorder}" Padding="10,8" Margin="0,8,0,0">
+                                    <StackPanel>
+                                        <CheckBox x:Name="WzQtyCheck" Content="自动调整买入数量（按预算算出份数，自动点 +/−）" VerticalAlignment="Center"/>
+                                        <WrapPanel Margin="0,8,0,0">
+                                            <TextBlock Margin="0,0,4,0" VerticalAlignment="Center" Text="数量+" Style="{StaticResource SecondaryText}"/>
+                                            <TextBox x:Name="WzPlusX" Width="46" Height="28"/>
+                                            <TextBox x:Name="WzPlusY" Width="46" Height="28" Margin="4,0,0,0"/>
+                                            <Button Content="点选" Width="46" Height="28" Margin="4,0,0,0" Click="WzPickPlus_Click"/>
+                                            <TextBlock Margin="16,0,4,0" VerticalAlignment="Center" Text="数量−" Style="{StaticResource SecondaryText}"/>
+                                            <TextBox x:Name="WzMinusX" Width="46" Height="28"/>
+                                            <TextBox x:Name="WzMinusY" Width="46" Height="28" Margin="4,0,0,0"/>
+                                            <Button Content="点选" Width="46" Height="28" Margin="4,0,0,0" Click="WzPickMinus_Click"/>
+                                            <TextBlock Margin="16,0,4,0" VerticalAlignment="Center" Text="买入前−复位次数" Style="{StaticResource SecondaryText}"/>
+                                            <TextBox x:Name="WzQtyReset" Width="46" Height="28" Text="20" ToolTip="先连点−该次数把数量复位，再点+到目标份数"/>
+                                        </WrapPanel>
+                                    </StackPanel>
+                                </Border>
+
+                                <!-- 邮件领取 -->
+                                <Border Style="{StaticResource CardBorder}" Padding="10,8" Margin="0,8,0,0">
+                                    <StackPanel>
+                                        <CheckBox x:Name="WzMailCheck" Content="每轮先领取邮箱里卖出所得的哈弗币，领完继续交易" VerticalAlignment="Center"/>
+                                        <WrapPanel Margin="0,8,0,0">
+                                            <TextBlock Margin="0,0,4,0" VerticalAlignment="Center" Text="邮箱按钮" Style="{StaticResource SecondaryText}"/>
+                                            <TextBox x:Name="WzMailX" Width="46" Height="28"/>
+                                            <TextBox x:Name="WzMailY" Width="46" Height="28" Margin="4,0,0,0"/>
+                                            <Button Content="点选" Width="46" Height="28" Margin="4,0,0,0" Click="WzPickMail_Click"/>
+                                            <TextBlock Margin="16,0,4,0" VerticalAlignment="Center" Text="一键领取" Style="{StaticResource SecondaryText}"/>
+                                            <TextBox x:Name="WzClaimX" Width="46" Height="28"/>
+                                            <TextBox x:Name="WzClaimY" Width="46" Height="28" Margin="4,0,0,0"/>
+                                            <Button Content="点选" Width="46" Height="28" Margin="4,0,0,0" Click="WzPickClaim_Click"/>
+                                            <TextBlock Margin="16,0,4,0" VerticalAlignment="Center" Text="关闭(可空=Esc)" Style="{StaticResource SecondaryText}"/>
+                                            <TextBox x:Name="WzCloseX" Width="46" Height="28"/>
+                                            <TextBox x:Name="WzCloseY" Width="46" Height="28" Margin="4,0,0,0"/>
+                                            <Button Content="点选" Width="46" Height="28" Margin="4,0,0,0" Click="WzPickClose_Click"/>
+                                        </WrapPanel>
+                                        <WrapPanel Margin="0,8,0,0">
+                                            <TextBlock Margin="0,0,4,0" VerticalAlignment="Center" Text="识别关键词" Style="{StaticResource SecondaryText}"/>
+                                            <TextBox x:Name="WzMailKeywords" Width="260" Height="28" Text="领取,哈弗币,附件" ToolTip="打开邮箱后OCR看到任一关键词才点领取，逗号分隔"/>
+                                        </WrapPanel>
+                                    </StackPanel>
+                                </Border>
+
+                                <!-- 风控 -->
+                                <WrapPanel Margin="0,8,0,0">
+                                    <CheckBox x:Name="WzBanCheck" Content="封禁检测" IsChecked="True" VerticalAlignment="Center"
+                                              ToolTip="OCR 全窗扫描封禁/异常关键词，命中立即自动停止全部执行"/>
+                                    <TextBlock Margin="12,0,4,0" VerticalAlignment="Center" Text="每N轮一次" Style="{StaticResource SecondaryText}"/>
+                                    <TextBox x:Name="WzBanEvery" Width="40" Height="28" Text="1" ToolTip="极速模式可填3降频提速；1=每轮都查最安全"/>
+                                    <TextBlock Margin="12,0,4,0" VerticalAlignment="Center" Text="关键词" Style="{StaticResource SecondaryText}"/>
+                                    <TextBox x:Name="WzBanKeywords" Width="170" Height="28" Text="封禁,封号,封停,冻结,异常,违规,惩罚,限制" ToolTip="逗号分隔，留空用内置词库"/>
+                                    <TextBlock Margin="12,0,4,0" VerticalAlignment="Center" Text="连跑上限(分)" Style="{StaticResource SecondaryText}"/>
+                                    <TextBox x:Name="WzMaxRunMin" Width="40" Height="28" Text="90" ToolTip="连续运行达到该分钟数后自动休息（0=关闭）"/>
+                                    <TextBlock Margin="12,0,4,0" VerticalAlignment="Center" Text="休息(分)" Style="{StaticResource SecondaryText}"/>
+                                    <TextBox x:Name="WzRestMin" Width="40" Height="28" Text="15" ToolTip="休息时长（0=关闭）"/>
+                                </WrapPanel>
+                                <WrapPanel Margin="0,10,0,0">
+                                    <Button Content="行情监控台（K线）" Width="150" Height="34" Click="OpenMonitor_Click"/>
+                                    <Button Content="🧩 流程工坊（编辑工程）" Width="190" Height="34" Margin="8,0,0,0" Click="OpenFlow_Click"
+                                            ToolTip="可视化流程编辑器：鼠标键盘模拟/OCR/模板匹配/买卖/AI节点，拖拽连线，保存为工程后在运行台启动"/>
+                                    <Button Content="保存配置" Width="90" Height="34" Margin="8,0,0,0" Click="WzSaveCfg_Click"/>
+                                    <Button Content="载入配置" Width="90" Height="34" Margin="8,0,0,0" Click="WzLoadCfg_Click"/>
+                                </WrapPanel>
+                                <TextBlock Margin="0,8,0,10" Foreground="{StaticResource TextSecondaryBrush}" TextWrapping="Wrap" FontSize="11"
+                                           Text="用法：在流程工坊编排并保存工程 → 关掉工坊 → 在顶部「流程工程运行台」选择工程点启动。运行中窗口自动隐藏，F9 呼出/隐藏，F12 急停；暂停或某步出错后可直接编辑节点保存，继续时从当前步重跑。双开时在节点属性里把「目标窗口」改成 B，即可操作窗口B。下方基本参数为旧托管引擎保留的策略/坐标标定。"/>
+                            </StackPanel>
+                        </ScrollViewer>
+                    </Grid>
+
+                    <!-- ========== 页面二：行情与 AI ========== -->
+                    <Grid x:Name="PageData" Visibility="Collapsed">
+                        <ScrollViewer VerticalScrollBarVisibility="Auto">
+                            <StackPanel Margin="2,0,0,0">
+                                <!-- 行情数据源 -->
+                                <Border Style="{StaticResource CardBorder}" Padding="12,10">
+                                    <StackPanel>
+                                        <TextBlock Text="行情数据源（moligod 官方接口）" Style="{StaticResource SectionTitleText}" Foreground="{StaticResource AccentBrush}"/>
+                                        <WrapPanel Margin="0,8,0,0">
+                                            <TextBlock Margin="0,0,6,0" VerticalAlignment="Center" Text="行情站点" Style="{StaticResource SecondaryText}"/>
+                                            <TextBox x:Name="MarketUrlBox" Width="260" Height="28" ToolTip="行情站点根地址，留空默认 https://moligod.com。粘贴完整接口地址也可以，会自动取站点根"/>
+                                            <Button Content="测试接口" Width="80" Height="30" Margin="12,0,0,0" Click="TestMarketButton_Click"/>
+                                            <Button Content="📈 打开监控台" Width="120" Height="30" Margin="8,0,0,0" Click="OpenMonitor_Click"
+                                                    ToolTip="打开 K 线风格行情监控台：走势图/RSI/信号流/成交流水/盈亏曲线"/>
+                                        </WrapPanel>
+                                        <TextBlock Margin="0,8,0,0" Foreground="{StaticResource TextSecondaryBrush}" TextWrapping="Wrap" FontSize="11"
+                                                   Text="流程里的「拉取全部行情」「自动选品」节点直接请求该站点（全量现价 + 分钟级历史序列），无需部署。测试接口会把行情与历史推送到监控台画图。"/>
+                                    </StackPanel>
+                                </Border>
+
+                                <!-- AI 决策 -->
+                                <Border Style="{StaticResource CardBorder}" Padding="12,10" Margin="0,8,0,0">
+                                    <StackPanel>
+                                        <TextBlock Text="AI 决策（DeepSeek）" Style="{StaticResource SectionTitleText}" Foreground="{StaticResource AccentBrush}"/>
+                                        <WrapPanel Margin="0,8,0,0">
+                                            <TextBlock Margin="0,0,6,0" VerticalAlignment="Center" Text="API Key" Style="{StaticResource SecondaryText}"/>
+                                            <PasswordBox x:Name="AiKeyBox" Width="220" Height="28" ToolTip="DeepSeek 平台(platform.deepseek.com)申请的 API Key，保存后存于程序目录 deepseek.json；流程的 AI决策/AI判断 节点读取此配置"/>
+                                            <TextBlock Margin="12,0,6,0" VerticalAlignment="Center" Text="模型" Style="{StaticResource SecondaryText}"/>
+                                            <TextBox x:Name="AiModelBox" Width="150" Height="28" Text="deepseek-chat" ToolTip="deepseek-chat=通用对话(快)；deepseek-reasoner=深度思考(慢)"/>
+                                            <Button Content="保存配置" Width="80" Height="30" Margin="12,0,0,0" Click="SaveAiConfig_Click"/>
+                                            <Button Content="测试连接" Width="80" Height="30" Margin="8,0,0,0" Click="TestAiButton_Click"/>
+                                        </WrapPanel>
+                                        <TextBlock Margin="0,8,0,0" Foreground="{StaticResource TextSecondaryBrush}" TextWrapping="Wrap" FontSize="11"
+                                                   Text="流程中的「AI决策」「AI是/否判断」「AI三选一执行」节点用 {变量名} 把行情发给 DeepSeek。提示词务必约束格式（如「只回答BUY或WAIT」）；AI 调用约 2-5 秒，勿放高频循环。"/>
+                                    </StackPanel>
+                                </Border>
+
+                                <!-- 识别设置 -->
+                                <Border Style="{StaticResource CardBorder}" Padding="12,10" Margin="0,8,0,0">
+                                    <StackPanel>
+                                        <TextBlock Text="画面识别设置（OCR）" Style="{StaticResource SectionTitleText}" Foreground="{StaticResource AccentBrush}"/>
+                                        <WrapPanel Margin="0,8,0,0">
+                                            <CheckBox x:Name="GpuAccelCheck" Content="启用 GPU 加速识别" VerticalAlignment="Center"
+                                                      ToolTip="勾选后尝试使用显卡加速 OCR（需环境支持）；不勾选强制使用 CPU。切换后首次识别会重新加载模型"/>
+                                        </WrapPanel>
+                                    </StackPanel>
+                                </Border>
+
+                                <!-- 指标速查说明 -->
+                                <Border Style="{StaticResource CardBorder}" Padding="12,10" Margin="0,8,0,0">
+                                    <StackPanel>
+                                        <TextBlock Text="量化指标说明（看不懂的看这里）" Style="{StaticResource SectionTitleText}" Foreground="{StaticResource AccentBrush}"/>
+                                        <TextBlock Margin="0,4,0,6" Foreground="{StaticResource TextSecondaryBrush}" FontSize="11" TextWrapping="Wrap"
+                                                   Text="流程节点「持仓行情/指标」与行情节点已内置这些指标，结果写入流程变量，可直接在「如果…否则」节点里比较判断。"/>
+                                        <UniformGrid Columns="2">
+                                            <TextBlock FontSize="11" TextWrapping="Wrap" Margin="0,2,16,2" Foreground="{StaticResource TextSecondaryBrush}"><Run Text="MA 均价：" Foreground="#F0F3F7" FontWeight="Bold"/>移动平均线，最近 N 周期价格的平均值，看平均成本/趋势方向</TextBlock>
+                                            <TextBlock FontSize="11" TextWrapping="Wrap" Margin="0,2,16,2" Foreground="{StaticResource TextSecondaryBrush}"><Run Text="EMA 指数均线：" Foreground="#F0F3F7" FontWeight="Bold"/>指数移动平均，近期价格权重更高，比 MA 更灵敏、反应更快</TextBlock>
+                                            <TextBlock FontSize="11" TextWrapping="Wrap" Margin="0,2,16,2" Foreground="{StaticResource TextSecondaryBrush}"><Run Text="RSI 相对强弱：" Foreground="#F0F3F7" FontWeight="Bold"/>0~100，&gt;70 超买（涨太多可能要跌），&lt;30 超卖（跌太多可能反弹）</TextBlock>
+                                            <TextBlock FontSize="11" TextWrapping="Wrap" Margin="0,2,16,2" Foreground="{StaticResource TextSecondaryBrush}"><Run Text="MIN 区间最低：" Foreground="#F0F3F7" FontWeight="Bold"/>最近 N 周期内的最低价，跌破/接近它算便宜，适合抄底</TextBlock>
+                                            <TextBlock FontSize="11" TextWrapping="Wrap" Margin="0,2,16,2" Foreground="{StaticResource TextSecondaryBrush}"><Run Text="MAX 区间最高：" Foreground="#F0F3F7" FontWeight="Bold"/>最近 N 周期内的最高价，接近它算贵，适合止盈卖出</TextBlock>
+                                            <TextBlock FontSize="11" TextWrapping="Wrap" Margin="0,2,16,2" Foreground="{StaticResource TextSecondaryBrush}"><Run Text="CHANGE 涨跌%：" Foreground="#F0F3F7" FontWeight="Bold"/>周期内涨跌幅百分比，正数在涨、负数在跌</TextBlock>
+                                            <TextBlock FontSize="11" TextWrapping="Wrap" Margin="0,2,16,2" Foreground="{StaticResource TextSecondaryBrush}"><Run Text="VOL 波动率：" Foreground="#F0F3F7" FontWeight="Bold"/>价格上下波动的剧烈程度（注意不是成交量），数值大=行情剧烈</TextBlock>
+                                            <TextBlock FontSize="11" TextWrapping="Wrap" Margin="0,2,16,2" Foreground="{StaticResource TextSecondaryBrush}"><Run Text="POSITION 高低位%：" Foreground="#F0F3F7" FontWeight="Bold"/>当前价在区间最低~最高中的位置，0%=最低位，100%=最高位</TextBlock>
+                                            <TextBlock FontSize="11" TextWrapping="Wrap" Margin="0,2,16,2" Foreground="{StaticResource TextSecondaryBrush}"><Run Text="LAST 最新值：" Foreground="#F0F3F7" FontWeight="Bold"/>最新一笔价格（取 N=1 时就是当前价）</TextBlock>
+                                            <TextBlock FontSize="11" TextWrapping="Wrap" Margin="0,2,16,2" Foreground="{StaticResource TextSecondaryBrush}"><Run Text="结果变量命名：" Foreground="#58E07D" FontWeight="Bold"/>指标+周期+源变量，如 MA20_1 = 变量1 的20周期均价</TextBlock>
+                                        </UniformGrid>
+                                    </StackPanel>
+                                </Border>
+                            </StackPanel>
+                        </ScrollViewer>
+                    </Grid>
+
+                    <!-- ========== 页面三：关于与帮助 ========== -->
+                    <Grid x:Name="PageAbout" Visibility="Collapsed">
+                        <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="0">
+                            <StackPanel Margin="6,0,0,0">
+                                <TextBlock FontSize="18" FontWeight="Bold" Foreground="{StaticResource AccentBrush}"><Run Language="zh-cn" Text="雷霆量化系统"/></TextBlock>
+                                <TextBlock x:Name="AboutVersionText" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,2,0,10"/>
+                                <Separator/>
+
+                                <TextBlock Text="🆕 v2.9.0 更新日志（界面重构 · 双开窗口B）" FontWeight="Bold" Margin="0,10,0,6"
+                                           Foreground="{StaticResource AccentBrush}" Style="{StaticResource SectionTitleText}"/>
+                                <TextBlock LineHeight="20" TextWrapping="Wrap" Foreground="{StaticResource TextPrimaryBrush}"
+                                           Text="🎛 主界面全面重构：旧的 A操作/B操作/条件/循环/跳转/注释/保存/按键/步骤编辑 九个步骤页签下架，全部能力已并入流程工坊节点（点击/按键/OCR/如果否则/循环/变量/备注一应俱全）；主界面改为左侧导航：流程运行台 / 行情与AI / 关于与帮助&#xA;🅱 双开支持：运动控制、视觉识别、买卖控制三类节点新增「目标窗口 A/B」参数，选 B 即操作顶部绑定的窗口B；画布上目标为B的节点摘要带 B· 前缀；未绑定对应窗口会在该节点明确报错并暂停&#xA;⏰ 定时任务迁移：定时启动/停止移到「流程工程运行台」卡片内，对选中的流程工程生效，到点每日自动执行&#xA;🧠 行情与AI页整合：moligod 行情接口测试、DeepSeek Key/模型配置、OCR GPU 开关、量化指标说明集中管理&#xA;🗂 旧步骤队列（SavedQueues）不再读取，文件保留在磁盘上不影响使用；所有自动化以 flows 流程工程为准"/>
+
+                                <TextBlock Text="历史版本" FontWeight="Bold" Margin="0,12,0,4" Style="{StaticResource SectionTitleText}"/>
+                                <TextBlock LineHeight="19" TextWrapping="Wrap" Foreground="{StaticResource TextSecondaryBrush}" FontSize="12"
+                                           Text="v2.8.0 节点屏蔽 + Lua/Python 脚本节点（沙箱），共14套内置模板&#xA;v2.7.0 流程工程运行台：暂停/继续/出错续跑、F9呼出/F12急停、4套新模板、坐标拾取全屏标定修复&#xA;v2.60 一键托管引擎 v2.6：领币→选品→买入→盯盘→交易行上架状态机，持仓 host_state.json 断电恢复&#xA;v2.50 流程工坊：40+ 节点拖拽编排、七类工具箱、OCR/模板匹配/AI 节点&#xA;更早版本：行情监控台K线、六策略选品、MA/RSI 九项量化指标、GPU加速OCR"/>
+                                <Separator/>
+
+                                <TextBlock Text="功能特性" FontWeight="Bold" Margin="0,10,0,6" Style="{StaticResource SectionTitleText}"/>
+                                <TextBlock LineHeight="20" TextWrapping="Wrap" Foreground="{StaticResource TextPrimaryBrush}"
+                                           Text="• 流程工坊：40+ 节点拖拽编排，真实执行（手/眼/交易/AI/Lua/Python），出错节点红色闪烁精确定位&#xA;• 双开倒卖：节点级目标窗口 A/B 切换，一套流程交替操作两个游戏窗口&#xA;• 量化指标：MA / EMA / RSI / MIN / MAX / CHANGE / VOL(波动率，非成交量) / POSITION 九项指标&#xA;• 智能选品：SMART综合 / 税后利润 / 追涨 / 抄底 / 超跌反弹 / 空间 六策略&#xA;• 行情监控台：K线风格实时盘面；AI 多套提问模板；极速模式拟人降频；定时启停无人值守"/>
+
+                                <TextBlock Text="使用说明（新用户按顺序看）" FontWeight="Bold" Margin="0,14,0,6" Style="{StaticResource SectionTitleText}"/>
+
+                                <TextBlock Text="① 绑定游戏窗口" Foreground="{StaticResource AccentBrush}" FontWeight="Bold" Margin="0,6,0,2"/>
+                                <TextBlock LineHeight="19" TextWrapping="Wrap" Foreground="{StaticResource TextPrimaryBrush}" FontSize="12"
+                                           Text="把准星拖到三角洲游戏窗口上松开，显示窗口标题即绑定成功。双开就再绑定窗口B。建议游戏使用无边框窗口化，分辨率不要频繁改动，否则坐标会偏移。"/>
+
+                                <TextBlock Text="② 编辑流程工程" Foreground="{StaticResource AccentBrush}" FontWeight="Bold" Margin="0,10,0,2"/>
+                                <TextBlock LineHeight="19" TextWrapping="Wrap" Foreground="{StaticResource TextPrimaryBrush}" FontSize="12"
+                                           Text="在「流程运行台」点新建工程，从工具箱拖节点、橙色圆点拉线：运动控制(点击/按键/拖拽/滚轮)、视觉识别(OCR/找图/等文字)、买卖控制(进交易行/领币/选品/买入/上架/军需回收)、逻辑判断(如果否则/循环/变量)、AI风控、Lua/Python 脚本。&#xA;坐标参数点「点选」、区域参数点「框选」，坐标都是游戏窗口相对坐标。双开的步骤把节点「目标窗口」改为 B。"/>
+
+                                <TextBlock Text="③ 启动 / 暂停 / 急停" Foreground="{StaticResource AccentBrush}" FontWeight="Bold" Margin="0,10,0,2"/>
+                                <TextBlock LineHeight="19" TextWrapping="Wrap" Foreground="{StaticResource TextPrimaryBrush}" FontSize="12"
+                                           Text="运行台选择工程点「▶ 启动」，窗口自动隐藏；F9 随时呼出/隐藏，F12 立即急停。暂停或某步出错后可直接在工坊改节点保存，点「▶ 继续」从出错那一步重跑（循环栈与变量保留）。也可在运行台设置定时启动/停止。"/>
+
+                                <TextBlock Text="④ 行情与 AI 配置" Foreground="{StaticResource AccentBrush}" FontWeight="Bold" Margin="0,10,0,2"/>
+                                <TextBlock LineHeight="19" TextWrapping="Wrap" Foreground="{StaticResource TextPrimaryBrush}" FontSize="12"
+                                           Text="「行情与AI」页测试 moligod 行情接口、填写 DeepSeek API Key 并保存（deepseek.json）。监控台用 K 线盘面看实时行情，绿=盈利红=亏损。没配 Key 时 AI 节点会报错闪红，删掉或绕过即可。"/>
+
+                                <TextBlock Text="⑤ 第一次务必这样测" Foreground="{StaticResource AccentBrush}" FontWeight="Bold" Margin="0,10,0,2"/>
+                                <TextBlock LineHeight="19" TextWrapping="Wrap" Foreground="{StaticResource TextPrimaryBrush}" FontSize="12"
+                                           Text="先跑内置「新手测试·领币读余额」模板 → 再跑「只播报不下单」 → 确认每步日志正常、节点不闪红，最后才开买入/上架模板。建议白天人在电脑前盯两轮，再挂夜间无人值守。"/>
+
+                                <Separator Margin="0,12,0,0"/>
+                                <TextBlock Text="团队信息" FontWeight="Bold" Margin="0,10,0,6" Style="{StaticResource SectionTitleText}"/>
+                                <TextBlock Text="团队：雷霆网络开发工作室    作者：超级 GGBond" Margin="0,0,0,4"/>
+                                <TextBlock Text="反馈 QQ 群：3245668977    站长邮箱：LeiTingQuant@126.com" Margin="0,0,0,10"/>
+                                <TextBlock Text="免责声明：本工具仅供学习交流使用，请遵守游戏用户协议；量化策略有亏损可能，交易行扣手续费与保证金，游戏内一切交易风险自负。建议合理控制频率，避免触发风控。"
+                                           Foreground="{StaticResource TextSecondaryBrush}" FontSize="11" TextWrapping="Wrap" Margin="0,0,0,12"/>
+                            </StackPanel>
+                        </ScrollViewer>
+                    </Grid>
+                </Grid>
+            </Grid>
+
+            <!-- 输出日志卡片（整行） -->
+            <Border Style="{StaticResource CardBorder}" Grid.Row="2" Padding="10,8" Margin="0,8,0,0">
+                <StackPanel Orientation="Vertical">
+                    <DockPanel Margin="0,0,0,6">
+                        <TextBlock Text="输出日志" Style="{StaticResource SectionTitleText}" VerticalAlignment="Center"/>
+                        <Button Content="复制全部日志" HorizontalAlignment="Right" DockPanel.Dock="Right" Padding="8,2" Height="24" FontSize="11" Click="CopyLog_Click"/>
+                    </DockPanel>
+                    <RichTextBox x:Name="OutputBox" Height="118" IsReadOnly="True" VerticalScrollBarVisibility="Auto" FontFamily="Consolas" BorderThickness="1">
+                        <FlowDocument>
+                            <Paragraph Margin="0"/>
+                        </FlowDocument>
+                    </RichTextBox>
+                </StackPanel>
+            </Border>
+        </Grid>
+    </Grid>
+</Window>

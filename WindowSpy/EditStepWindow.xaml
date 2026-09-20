@@ -1,0 +1,220 @@
+<Window x:Class="WindowSpy.EditStepWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="编辑步骤" SizeToContent="Height" Width="400" WindowStartupLocation="CenterOwner" ResizeMode="NoResize"
+        Background="{StaticResource BgWindowBrush}" Foreground="{StaticResource TextPrimaryBrush}"
+        FontFamily="Microsoft YaHei UI, Segoe UI">
+    <StackPanel Margin="16">
+        <TextBlock x:Name="TitleText" Text="编辑步骤" FontWeight="Bold" FontSize="14" Foreground="{StaticResource AccentBrush}" Margin="0,0,0,10"/>
+
+        <!-- Common: Delay -->
+        <DockPanel Margin="0,5" x:Name="PanelDelay">
+            <TextBlock Text="延迟(ms):" Width="100" VerticalAlignment="Center"/>
+            <TextBox x:Name="TxtDelay" Width="60" Height="26" VerticalContentAlignment="Center"/>
+            <TextBlock Text="±" Margin="5,0,5,0" VerticalAlignment="Center"/>
+            <TextBox x:Name="TxtRandomDelay" Width="50" Height="26" VerticalContentAlignment="Center"/>
+        </DockPanel>
+
+        <!-- Click: Point -->
+        <DockPanel Margin="0,5" x:Name="PanelPoint">
+            <StackPanel Width="100" VerticalAlignment="Center">
+                <TextBlock Text="点击位置:"/>
+                <Button x:Name="BtnPickPoint" Content="重选位置" Margin="0,5,10,0" Width="80" Height="22" HorizontalAlignment="Left" Click="BtnPickPoint_Click"/>
+            </StackPanel>
+            <StackPanel Orientation="Vertical">
+                <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
+                    <TextBlock Text="X:" VerticalAlignment="Center" Margin="0,0,5,0"/>
+                    <TextBox x:Name="TxtPointX" Width="60" Height="26" VerticalContentAlignment="Center"/>
+                    <TextBlock Text="Y:" VerticalAlignment="Center" Margin="10,0,5,0"/>
+                    <TextBox x:Name="TxtPointY" Width="60" Height="26" VerticalContentAlignment="Center"/>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="随机偏X:" VerticalAlignment="Center" Margin="0,0,5,0"/>
+                    <TextBox x:Name="TxtRandomX" Width="40" Height="26" VerticalContentAlignment="Center" ToolTip="X坐标随机偏差 (±值)"/>
+                    <TextBlock Text="随机偏Y:" VerticalAlignment="Center" Margin="10,0,5,0"/>
+                    <TextBox x:Name="TxtRandomY" Width="40" Height="26" VerticalContentAlignment="Center" ToolTip="Y坐标随机偏差 (±值)"/>
+                </StackPanel>
+            </StackPanel>
+        </DockPanel>
+
+        <!-- Click: Dwell -->
+        <DockPanel Margin="0,5" x:Name="PanelDwell">
+            <TextBlock x:Name="LblDwell" Text="停留(ms):" Width="100" VerticalAlignment="Center"/>
+            <TextBox x:Name="TxtDwell" Width="60" Height="26" VerticalContentAlignment="Center"/>
+            <TextBlock Text="±" Margin="5,0,5,0" VerticalAlignment="Center"/>
+            <TextBox x:Name="TxtRandomDwell" Width="50" Height="26" VerticalContentAlignment="Center" ToolTip="随机偏差范围 (±值)"/>
+        </DockPanel>
+
+        <!-- OCR: Rect -->
+        <StackPanel x:Name="PanelRect" Margin="0,5">
+             <StackPanel Orientation="Horizontal" Margin="0,0,0,5">
+                 <TextBlock Text="识别区域:" VerticalAlignment="Center"/>
+                 <Button x:Name="BtnSelectRect" Content="重选识别位置" Margin="10,0,0,0" Width="90" Height="22" Click="BtnSelectRect_Click"/>
+             </StackPanel>
+             <StackPanel Orientation="Horizontal">
+                <TextBlock Text="X:" VerticalAlignment="Center" Margin="0,0,5,0"/>
+                <TextBox x:Name="TxtRectX" Width="50" Height="26" VerticalContentAlignment="Center"/>
+                <TextBlock Text="Y:" VerticalAlignment="Center" Margin="10,0,5,0"/>
+                <TextBox x:Name="TxtRectY" Width="50" Height="26" VerticalContentAlignment="Center"/>
+                <TextBlock Text="W:" VerticalAlignment="Center" Margin="10,0,5,0"/>
+                <TextBox x:Name="TxtRectW" Width="50" Height="26" VerticalContentAlignment="Center"/>
+                <TextBlock Text="H:" VerticalAlignment="Center" Margin="10,0,5,0"/>
+                <TextBox x:Name="TxtRectH" Width="50" Height="26" VerticalContentAlignment="Center"/>
+             </StackPanel>
+        </StackPanel>
+
+        <!-- OCR: Options -->
+        <DockPanel Margin="0,5" x:Name="PanelOcrOpt">
+            <StackPanel>
+                <CheckBox x:Name="ChkOcrNums" Content="只识别数字" VerticalAlignment="Center"/>
+                <CheckBox x:Name="ChkReuseOcrRoi" Content="ROI未变化复用OCR结果" VerticalAlignment="Center" Margin="0,4,0,0"/>
+            </StackPanel>
+        </DockPanel>
+
+        <!-- Loop: Count -->
+        <DockPanel Margin="0,5" x:Name="PanelCount">
+            <TextBlock Text="循环次数:" Width="100" VerticalAlignment="Center"/>
+            <TextBox x:Name="TxtCount" Height="26" VerticalContentAlignment="Center"/>
+        </DockPanel>
+
+        <!-- Condition/Expression: Pattern -->
+        <DockPanel Margin="0,5" x:Name="PanelPattern">
+            <TextBlock x:Name="LblPattern" Text="模式/表达式:" Width="100" VerticalAlignment="Center"/>
+            <TextBox x:Name="TxtPattern" Height="26" VerticalContentAlignment="Center"/>
+        </DockPanel>
+
+        <TextBlock x:Name="TxtExprHelp" Margin="100,0,0,5" Foreground="Gray" TextWrapping="Wrap" Visibility="Collapsed" FontSize="10">
+            支持运算符: ==, !=, >, >=, &lt;, &lt;=, AND(&amp;&amp;), OR(||)<LineBreak/>
+            示例: A1 == '文本' OR B1 > 100<LineBreak/>
+            变量说明: A1, B1 等为保存的变量名，文本需用引号包裹
+        </TextBlock>
+
+        <!-- Save/Condition: Key -->
+        <DockPanel Margin="0,5" x:Name="PanelKey">
+            <TextBlock x:Name="LblKey" Text="变量键名:" Width="100" VerticalAlignment="Center"/>
+            <Button x:Name="BtnIdentifyKey" Content="识别按键" Width="70" Margin="0,0,5,0" Click="BtnIdentifyKey_Click" Visibility="Collapsed"/>
+            <TextBox x:Name="TxtKey" Height="26" VerticalContentAlignment="Center"/>
+        </DockPanel>
+
+        <!-- Quant -->
+        <StackPanel x:Name="PanelQuant" Margin="0,5" Visibility="Collapsed">
+            <DockPanel Margin="0,0,0,5">
+                <TextBlock Text="指标函数:" Width="100" VerticalAlignment="Center"/>
+                <ComboBox x:Name="CmbQuantFunc" Height="26" Width="160" VerticalContentAlignment="Center" ToolTip="量化指标函数">
+                    <ComboBoxItem Content="MA 均价"/>
+                    <ComboBoxItem Content="EMA 指数均线"/>
+                    <ComboBoxItem Content="RSI 相对强弱"/>
+                    <ComboBoxItem Content="MIN 区间最低"/>
+                    <ComboBoxItem Content="MAX 区间最高"/>
+                    <ComboBoxItem Content="CHANGE 涨跌%"/>
+                    <ComboBoxItem Content="VOL 波动率"/>
+                    <ComboBoxItem Content="POSITION 高低位%"/>
+                    <ComboBoxItem Content="LAST 最新值"/>
+                </ComboBox>
+            </DockPanel>
+            <DockPanel Margin="0,0,0,5">
+                <TextBlock Text="周期(样本数):" Width="100" VerticalAlignment="Center"/>
+                <TextBox x:Name="TxtQuantParam" Width="60" Height="26" VerticalContentAlignment="Center"/>
+            </DockPanel>
+            <DockPanel>
+                <TextBlock Text="结果变量:" Width="100" VerticalAlignment="Center"/>
+                <TextBox x:Name="TxtQuantResult" Height="26" VerticalContentAlignment="Center"/>
+            </DockPanel>
+        </StackPanel>
+
+        <!-- MarketPull -->
+        <StackPanel x:Name="PanelMarket" Margin="0,5" Visibility="Collapsed">
+            <DockPanel Margin="0,0,0,5">
+                <TextBlock Text="站点地址:" Width="100" VerticalAlignment="Center"/>
+                <TextBox x:Name="TxtMarketUrl" Height="26" VerticalContentAlignment="Center" ToolTip="行情站点根地址，如 https://moligod.com（留空默认 moligod）"/>
+            </DockPanel>
+            <DockPanel Margin="0,0,0,5">
+                <TextBlock Text="现价变量:" Width="100" VerticalAlignment="Center"/>
+                <TextBox x:Name="TxtMarketPriceVar" Height="26" VerticalContentAlignment="Center"/>
+            </DockPanel>
+            <DockPanel Margin="0,0,0,5">
+                <TextBlock Text="涨跌变量:" Width="100" VerticalAlignment="Center"/>
+                <TextBox x:Name="TxtMarketChangeVar" Height="26" VerticalContentAlignment="Center"/>
+            </DockPanel>
+            <DockPanel>
+                <TextBlock Text="历史点数:" Width="100" VerticalAlignment="Center"/>
+                <TextBox x:Name="TxtMarketHistoryLimit" Width="60" Height="26" VerticalContentAlignment="Center" HorizontalAlignment="Left"/>
+                <CheckBox x:Name="ChkSeedHistory" Content="用接口历史初始化序列" Margin="10,0,0,0" VerticalAlignment="Center"/>
+            </DockPanel>
+            <DockPanel Margin="0,5,0,0">
+                <CheckBox x:Name="ChkAutoPick" Content="自动选品（哪个赚钱买哪个）" VerticalAlignment="Center"
+                          ToolTip="勾选后不按子弹名匹配，按策略选出最值得买的一个"/>
+            </DockPanel>
+            <DockPanel Margin="0,5,0,0">
+                <TextBlock Text="选品策略:" Width="100" VerticalAlignment="Center"/>
+                <ComboBox x:Name="CmbPickStrategy" Height="26" Width="170" VerticalContentAlignment="Center">
+                    <ComboBoxItem Content="PROFIT 税后利润(纯利润)"/>
+                    <ComboBoxItem Content="RISE 追涨(涨幅最高)"/>
+                    <ComboBoxItem Content="DIP 抄底(低于均价%)"/>
+                    <ComboBoxItem Content="REBOUND 超跌反弹(跌幅+低位)"/>
+                    <ComboBoxItem Content="RANGE 空间(区间振幅%)"/>
+                </ComboBox>
+            </DockPanel>
+            <DockPanel Margin="0,5,0,0">
+                <TextBlock Text="品名变量:" Width="100" VerticalAlignment="Center"/>
+                <TextBox x:Name="TxtBulletVar" Height="26" VerticalContentAlignment="Center" ToolTip="选中子弹的名称保存到该变量"/>
+            </DockPanel>
+        </StackPanel>
+
+        <!-- AiAsk -->
+        <StackPanel x:Name="PanelAi" Margin="0,5" Visibility="Collapsed">
+            <DockPanel Margin="0,0,0,5">
+                <TextBlock Text="模型:" Width="100" VerticalAlignment="Center"/>
+                <TextBox x:Name="TxtAiModel" Height="26" VerticalContentAlignment="Center" ToolTip="deepseek-chat(快) / deepseek-reasoner(深度思考)"/>
+            </DockPanel>
+            <DockPanel Margin="0,0,0,5">
+                <TextBlock Text="提示词模板:" Width="100" VerticalAlignment="Top" Margin="0,3,0,0"/>
+                <TextBox x:Name="TxtAiPrompt" Height="70" TextWrapping="Wrap" AcceptsReturn="True"
+                         VerticalScrollBarVisibility="Auto" VerticalContentAlignment="Top"
+                         ToolTip="支持 {变量名} 引用当前变量。示例：现价{Price}，MA20={Ma20}。仅回答BUY或SELL"/>
+            </DockPanel>
+            <DockPanel>
+                <TextBlock Text="结果变量:" Width="100" VerticalAlignment="Center"/>
+                <TextBox x:Name="TxtAiResult" Height="26" VerticalContentAlignment="Center" ToolTip="AI回答(首行)保存到该变量，配合If: Ai1 == 'BUY'"/>
+            </DockPanel>
+        </StackPanel>
+
+        <!-- BanCheck -->
+        <StackPanel x:Name="PanelBan" Margin="0,5" Visibility="Collapsed">
+            <DockPanel>
+                <TextBlock Text="封禁关键词:" Width="100" VerticalAlignment="Top" Margin="0,3,0,0"/>
+                <TextBox x:Name="TxtBanKeywords" Height="50" TextWrapping="Wrap" AcceptsReturn="True"
+                         VerticalScrollBarVisibility="Auto" VerticalContentAlignment="Top"
+                         ToolTip="逗号分隔。每轮执行到这里时 OCR 全窗扫描，命中任一关键词立即自动停止全部执行。留空用内置词库：封禁,封号,封停,冻结,异常,违规,惩罚,限制,警告,维护"/>
+            </DockPanel>
+        </StackPanel>
+
+        <!-- Condition/Expression: Jump -->
+        <DockPanel Margin="0,5" x:Name="PanelJump">
+             <CheckBox x:Name="ChkJump" Content="条件满足则跳出" VerticalAlignment="Center"/>
+        </DockPanel>
+
+        <!-- Network -->
+        <DockPanel Margin="0,5" x:Name="PanelNetwork">
+            <StackPanel Orientation="Vertical">
+                <DockPanel Margin="0,0,0,5">
+                    <TextBlock Text="网卡名称:" Width="100" VerticalAlignment="Center"/>
+                    <ComboBox x:Name="CmbNetworkAdapter" Height="26" VerticalContentAlignment="Center" IsEditable="True"/>
+                </DockPanel>
+                <DockPanel>
+                    <TextBlock Text="操作:" Width="100" VerticalAlignment="Center"/>
+                    <ComboBox x:Name="CmbNetworkAction" Height="26" VerticalContentAlignment="Center">
+                        <ComboBoxItem Content="断开"/>
+                        <ComboBoxItem Content="恢复"/>
+                    </ComboBox>
+                </DockPanel>
+                <CheckBox x:Name="ChkNetworkSync" Content="同步执行 (等待操作完成)" Margin="100,5,0,0"/>
+            </StackPanel>
+        </DockPanel>
+
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,15,0,0">
+            <Button Content="保存" Click="Save_Click" Width="80" Height="30" Margin="0,0,10,0" Style="{StaticResource PrimaryButton}"/>
+            <Button Content="取消" Click="Cancel_Click" Width="80" Height="30"/>
+        </StackPanel>
+    </StackPanel>
+</Window>

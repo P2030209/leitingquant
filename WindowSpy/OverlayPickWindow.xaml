@@ -1,0 +1,19 @@
+<Window x:Class="WindowSpy.OverlayPickWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="OverlayPickWindow" WindowStyle="None" AllowsTransparency="True" Background="#01FFFFFF"
+        Topmost="True" WindowState="Normal" ShowInTaskbar="False" ResizeMode="NoResize"
+        PreviewKeyDown="Window_KeyDown">
+    <Canvas x:Name="RootCanvas" Background="Transparent"
+            MouseLeftButtonDown="RootCanvas_MouseLeftButtonDown"
+            MouseLeftButtonUp="RootCanvas_MouseLeftButtonUp">
+        <Border Canvas.Left="0" Canvas.Top="24" Width="{x:Static SystemParameters.PrimaryScreenWidth}" Background="Transparent" IsHitTestVisible="False">
+            <StackPanel HorizontalAlignment="Center">
+                <Border Background="#CC10151C" CornerRadius="6" Padding="16,9" BorderBrush="#FF8A2A" BorderThickness="1">
+                    <TextBlock Foreground="#FFE9D8" FontSize="15" FontWeight="SemiBold"
+                               Text="🎯 在游戏画面上【单击】要采集的位置（自动换算为游戏窗口相对坐标） · 按 Esc 取消"/>
+                </Border>
+            </StackPanel>
+        </Border>
+    </Canvas>
+</Window>
